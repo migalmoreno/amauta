@@ -202,10 +202,23 @@ code {
   top: 0;
   display: flex;
   flex-wrap: nowrap;
-  background: var(--bg-dim);
   align-items: center;
-  border-bottom: 1px solid var(--border-dim);
   z-index: 10;
+  padding-top: 20px;
+  background: var(--bg-main);
+}
+
+.navbar__nav {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  max-height: none;
+  overflow: hidden;
+  border-radius: 5px;
+  z-index: 20;
+  background: var(--bg-dim);
+  margin: 0 auto;
+  border: 1px solid var(--border-dim);
 }
 
 .navbar__images {
@@ -221,6 +234,7 @@ code {
   gap: 0.5rem;
   white-space: nowrap;
   font-weight: 600;
+  padding: 20px;
 }
 
 .navbar__link {
@@ -232,15 +246,6 @@ code {
 
 .navbar__link:hover {
   text-decoration: none;
-}
-
-.navbar__nav {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  max-height: none;
-  overflow: hidden;
-  z-index: 20;
 }
 
 .navbar__menu {
@@ -284,7 +289,7 @@ code {
   cursor: pointer;
   float: right;
   display: none;
-  padding: 1rem 0.5rem;
+  padding: 20px;
 }
 
 .menu-icon {
@@ -319,6 +324,7 @@ code {
 }
 
 .navbar__mobile-menu:checked ~ .navbar__menu {
+  border: 1px solid var(--border-dim);
   max-height: calc(100vh - var(--navbar-height));
 }
 
@@ -337,9 +343,8 @@ code {
 }
 
 .body-container {
-  min-height: calc(100vh - var(--navbar-height));
+  min-height: calc(100dvh - var(--navbar-height));
   height: auto;
-  max-height: auto;
   display: flex;
   justify-content: center;
   flex-direction: column;
@@ -772,8 +777,12 @@ div[id*="container-ordenada"] p:has(i):has(a) > a {
 }
 
 @media screen and (min-width: 1200px) {
-  main,
   .navbar__nav {
+    min-width: 70rem;
+    max-width: 70rem;
+  }
+
+  main {
     margin: 0 auto;
     min-width: 60rem;
     max-width: 60rem;
@@ -781,8 +790,11 @@ div[id*="container-ordenada"] p:has(i):has(a) > a {
 }
 
 @media screen and (min-width: 800px) and (max-width: 1200px) {
-  main,
   .navbar__nav {
+    min-width: 90%;
+    max-width: 90%;
+  }
+  main {
     margin: 0 auto;
     min-width: 80%;
     max-width: 80%;
@@ -790,14 +802,18 @@ div[id*="container-ordenada"] p:has(i):has(a) > a {
 }
 
 @media screen and (max-width: 800px) {
+  :root {
+    --navbar-height: 70px;
+  }
+
   body {
     font-size: 1rem;
   }
 
   .navbar__nav {
     margin: 0 auto;
-    min-width: 90%;
-    max-width: 90%;
+    min-width: 95%;
+    max-width: 95%;
   }
 
   .main {
@@ -813,13 +829,16 @@ div[id*="container-ordenada"] p:has(i):has(a) > a {
 
   .navbar__menu {
     max-height: 0;
-    height: 100%;
-    width: 100%;
+    height: auto;
+    width: 95%;
+    margin: 0 auto;
     position: fixed;
-    right: 0;
-    top: var(--navbar-height);
+    overflow: scroll;
+    border-radius: 5px;
+    top: calc(var(--navbar-height) + 20px);
     flex-direction: column;
     justify-content: center;
+    align-items: center;
     background: var(--bg-dim);
   }
 
@@ -829,6 +848,17 @@ div[id*="container-ordenada"] p:has(i):has(a) > a {
 
   .menu-item {
     font-size: 18px;
+    width: 100%;
+    padding: 0;
+  }
+
+  .menu-item__link {
+    width: 100%;
+    padding: 20px 0;
+    height: auto;
+    display: flex;
+    justify-content: center;
+    border-bottom: none;
   }
 
   .post-item {
