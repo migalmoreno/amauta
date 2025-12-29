@@ -184,7 +184,7 @@
            (main (@ (class "main")) ,body)
            (footer (@ (class "footer"))
                    (div (@ (class "footer__wrapper"))
-                        ,(format #f "© 2024 ~a" %fullname))))))))
+                        ,(format #f "© 2025 ~a" %fullname))))))))
 
 
 ;;
