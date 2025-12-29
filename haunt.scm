@@ -327,6 +327,9 @@ correct practices. Particularly interested in functional programming."))
            '(span "Email")
            '(span (code "mail") " at " (code "$DOMAIN")))
          ,(contact-entry
+           '(span "XMPP")
+           '(span (code "migalmoreno") " at " (code "$DOMAIN")))
+         ,(contact-entry
            '(span "PGP")
            (anchor '(code "4956 DAC8 B077 15EA 9F14  E13A EF1F 69BF 5F23 F458")
                    "/assets/pubkey.asc"
