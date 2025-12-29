@@ -3,8 +3,8 @@
 * Blog
 This is my personal blog built with the [[https://dthompson.us/projects/haunt.html][Haunt]] static site generator.
 
-To build the whole site, do this:
+To build the whole site, run:
 
 #+begin_src sh
-nix develop
+nix develop --build
 #+end_src
