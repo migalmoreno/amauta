@@ -27,6 +27,7 @@
                 htmlize
                 nix-mode
                 nginx-mode
+                yaml-mode
                 rainbow-delimiters
                 (trivialBuild {
                   pname = "ox-html-stable-ids";
@@ -70,6 +71,7 @@
             (setq org-html-stable-ids t)
             (require 'nix-mode)
             (require 'nginx-mode)
+            (require 'yaml-mode)
             (require 'rainbow-delimiters)
             (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
             EOF
