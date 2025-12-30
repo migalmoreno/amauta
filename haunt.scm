@@ -219,11 +219,6 @@
                                     %username (post-title project))
                             #:external? #t
                             #:extra-classes "project__link")
-                   ,(anchor "Cgit"
-                            (format #f "https://git.~a/~a"
-                                    %domain (post-title project))
-                            #:external? #t
-                            #:extra-classes "project__link")
                    ,(post-ref project 'license))
               (div (@ (class "post__metadata-items"))
                    (h4 (@ (class "post__subtitle"))
