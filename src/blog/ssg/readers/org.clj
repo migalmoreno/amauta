@@ -92,10 +92,10 @@
 (defn- ensure-daemon!
   []
   (when (and (:use-emacsclient config) (not (daemon-running?)))
-    (proc/process ["emacs" (str "--daemon=" (:daemon-name config)) "-Q" "-nw"])
+    (proc/process ["emacs" (str "--daemon=" (:daemon-name config)) "-Q"])
     (Thread/sleep 2000)))
 
-(def ^:private emacs-timeout-ms 10000)
+(def ^:private emacs-timeout-ms 30000)
 
 (defn- run-emacs
   [form-str]
@@ -108,7 +108,9 @@
     (when (= result ::timeout)
       (.destroyForcibly ^java.lang.Process (:proc p))
       (throw (ex-info (str "Emacs subprocess timed out after "
-                           (/ emacs-timeout-ms 1000) "s") {})))
+                           (/ emacs-timeout-ms 1000)
+                           "s")
+                      {})))
     (let [{:keys [out err exit]} result]
       (when-not (zero? exit)
         (throw (ex-info (str "Emacs subprocess failed\n" err)
