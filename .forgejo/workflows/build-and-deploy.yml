@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-and-deploy:
-    runs-on: auriga:host
+    runs-on: auriga
     steps:
       - uses: actions/checkout@v4
       - name: Build
