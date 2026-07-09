@@ -15,9 +15,10 @@ jobs:
           FORGE_BASE_URL: ${{ github.server_url }}/migalmoreno/
           HOME: /tmp/runner-home
         run: |
-          mkdir -p /tmp/runner-home
-          rm -rf node_modules
-          nix develop --command bash -c "npm install && clojure -M:build"
+          mkdir -p /tmp/runner-home /tmp/npm-work
+          npm install --prefix /tmp/npm-work
+          ln -sfn /tmp/npm-work/node_modules ./node_modules
+          nix develop --command bash -c "clojure -M:build"
       - name: Deploy to Cloudflare Pages
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
