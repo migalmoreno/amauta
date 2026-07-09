@@ -16,6 +16,7 @@
             clojure
             git
             nodejs
+            openssh
             (emacs.pkgs.withPackages (
               epkgs: with epkgs; [
                 htmlize
