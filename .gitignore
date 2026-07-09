@@ -1,5 +1,11 @@
+.clj-kondo
+.cpcache
+.lsp
+.nrepl-port
 .org-mode-reader-cache
-.dir-locals.el
+.shadow-cljs
+node_modules
 site
 *.tar.gz
 .direnv
+assets/js/

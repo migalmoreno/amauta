@@ -2,13 +2,12 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     systems.url = "github:nix-systems/default";
-    ordenada.url = "github:migalmoreno/ordenada";
-    tubo.url = "github:migalmoreno/tubo";
-    nx-router.url = "github:migalmoreno/nx-router";
-    nx-tailor.url = "github:migalmoreno/nx-tailor";
-    nx-mosaic.url = "github:migalmoreno/nx-mosaic";
-    fdroid-el.url = "github:migalmoreno/fdroid.el";
-    nyxt-el.url = "github:migalmoreno/nyxt.el";
+    tubo.url = "git+ssh://forgejo@auriga/migalmoreno/tubo";
+    nx-router.url = "git+ssh://forgejo@auriga/migalmoreno/nx-router";
+    nx-tailor.url = "git+ssh://forgejo@auriga/migalmoreno/nx-tailor";
+    nx-mosaic.url = "git+ssh://forgejo@auriga/migalmoreno/nx-mosaic";
+    fdroid-el.url = "git+ssh://forgejo@auriga/migalmoreno/fdroid.el";
+    nyxt-el.url = "git+ssh://forgejo@auriga/migalmoreno/nyxt.el";
   };
   outputs =
     inputs@{ nixpkgs, systems, ... }:
@@ -20,11 +19,12 @@
       devShells = eachSystem (pkgs: {
         default = pkgs.mkShell {
           buildInputs = with pkgs; [
-            haunt
-            guile
+            clojure
+            nodejs
             (emacs.pkgs.withPackages (
               epkgs: with epkgs; [
                 htmlize
+                clojure-mode
                 nix-mode
                 nginx-mode
                 yaml-mode
@@ -47,7 +47,7 @@
             ${toString (
               map
                 (name: ''
-                  cat ${./projects/${name}.org} ${
+                  (echo "#+SOURCE-DIR: ${inputs.${name}}" && cat ${./projects/${name}.org} ${
                     if
                       pkgs.lib.hasAttrByPath [
                         "packages"
@@ -56,30 +56,29 @@
                       ] inputs.${name}
                     then
                       "${inputs.${name}.packages.${pkgs.system}.docs}/index.org"
+                    else if builtins.pathExists "${inputs.${name}}/README.org" then
+                      "${inputs.${name}}/README.org"
                     else
                       "${inputs.${name}}/README"
-                  } > $tmpdir/${name}.org
+                  }) > $tmpdir/${name}.org
                   ln -sf $tmpdir/${name}.org ./posts/projects/${name}.org
                 '')
                 (map (path: pkgs.lib.removeSuffix ".org" path) (builtins.attrNames (builtins.readDir ./projects)))
             )}
-            export HAUNT_ORG_READER_EMACS_DAEMON_NAME="haunt-build"
-            emacs --daemon="$HAUNT_ORG_READER_EMACS_DAEMON_NAME" -Q
             cat > $tmpdir/preamble.el<< EOF
             (require 'ox-html-stable-ids)
             (org-html-stable-ids-add)
             (setq org-html-stable-ids t)
             (require 'nix-mode)
+            (require 'clojure-mode)
             (require 'nginx-mode)
             (require 'yaml-mode)
+            (add-to-list 'auto-mode-alist '("\\.y[a]?ml\\'" . yaml-mode))
             (require 'rainbow-delimiters)
             (add-hook 'prog-mode-hook #'rainbow-delimiters-mode)
             EOF
-
             export HAUNT_ORG_READER_EMACS_PREAMBLE=$tmpdir/preamble.el
             export HAUNT_ORG_READER_USE_EMACSCLIENT=1
-            haunt build
-            emacsclient -s "$HAUNT_ORG_READER_EMACS_DAEMON_NAME" -e "(kill-emacs)"
           '';
         };
       });

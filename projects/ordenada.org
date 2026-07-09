@@ -1,3 +1,0 @@
-#+SYNOPSIS: Opinionated reproducible development environments for Nix
-#+TAGS: nix linux
-#+LICENSE: GPL-3.0+

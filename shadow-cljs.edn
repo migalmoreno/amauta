@@ -1,0 +1,6 @@
+{:source-paths ["src"]
+ :deps true
+ :builds {:frontend {:target     :browser
+                     :output-dir "assets/js"
+                     :asset-path "/assets/js"
+                     :modules    {:main {:init-fn blog.frontend.core/init!}}}}}
