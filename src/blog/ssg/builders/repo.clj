@@ -155,6 +155,7 @@
                   (try
                     (when forge-base-url
                       (ensure-mirror! (str forge-base-url repo-name) git-dir))
+                    (proc/shell "git" "-C" git-dir "repack" "-a" "-d" "--max-pack-size=20m")
                     (write-info-refs! git-dir)
                     (write-info-packs! git-dir)
                     [{:path      (str (subs prefix 1) "/" slug ".git")
