@@ -16,6 +16,7 @@ jobs:
           HOME: /tmp/runner-home
         run: |
           mkdir -p /tmp/runner-home
+          rm -rf node_modules
           nix develop --command bash -c "npm install && clojure -M:build"
       - name: Deploy to Cloudflare Pages
         env:
