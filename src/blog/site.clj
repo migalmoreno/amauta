@@ -177,7 +177,7 @@
   [_site title posts _prefix]
   [:div.blog
    [:div.main__title [:h1.blog__title title]
-    [:button.button.button__type-border (anchor "Feed" "/feed.xml")]]
+    [:button.button.button--type-border (anchor "Feed" "/feed.xml")]]
    (into [:div.blog-entries]
          (blog-entries (post/posts-reverse-chronological posts)))])
 
