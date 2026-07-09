@@ -16,6 +16,8 @@ jobs:
           HOME: /tmp/runner-home
         run: |
           mkdir -p /tmp/runner-home /tmp/npm-work
+          rm -rf /tmp/runner-home/.npm /tmp/npm-work
+          mkdir -p /tmp/npm-work
           cp package.json /tmp/npm-work/
           npm install --prefix /tmp/npm-work
           ln -sfn /tmp/npm-work/node_modules ./node_modules
