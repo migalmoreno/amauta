@@ -3,6 +3,7 @@
 .lsp
 .nrepl-port
 .org-mode-reader-cache
+.git-cache
 .shadow-cljs
 node_modules
 site

@@ -8,7 +8,12 @@
   (let [dest (fs/path output-dir path)]
     (if directory?
       (fs/copy-tree copy-from dest {:replace-existing true})
-      (do (fs/create-dirs (fs/parent dest)) (spit (fs/file dest) content)))))
+      (do
+        (fs/create-dirs (fs/parent dest))
+        (if (bytes? content)
+          (with-open [out (java.io.FileOutputStream. (fs/file dest))]
+            (.write out ^bytes content))
+          (spit (fs/file dest) content))))))
 
 (defn- normalize-artifacts
   "Coerce the return value of a builder into a flat seq of artifact maps."

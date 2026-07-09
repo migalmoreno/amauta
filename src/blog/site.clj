@@ -24,6 +24,9 @@
 
 (def blog-prefix "/blog")
 (def portfolio-prefix "/projects")
+(def forge-base-url "ssh://forgejo@auriga/migalmoreno/")
+
+(defn- repo-name [slug] (str/replace slug #"-el$" ".el"))
 
 (defn logo
   [&
@@ -122,12 +125,14 @@
       :href (str "data:image/svg+xml,"
                  (codec/url-encode (h/html (logo :fill "#c4c4c4"))))}]
     (stylesheet "main" :local? true)
+    [:link {:rel "stylesheet" :href "/assets/css/highlight.css"}]
     [:script {:src "/assets/js/main.js" :defer true}]]
    [:body navbar
     [:div.body-container
      [:main.main body]
      [:footer.footer
-      [:div.footer__wrapper "© " [:span#footer-year] " " fullname]]]]))
+      [:div.footer__wrapper "© "
+       [:span#footer-year (.getValue (java.time.Year/now))] " " fullname]]]]))
 
 (defn post-template
   [p]
@@ -145,8 +150,11 @@
 
 (defn project-template
   [p]
-  (let [src      (some-> (post/post-ref p :source-dir) fs/path)
-        base-url (str portfolio-prefix "/" (post/post-slug p) "/files")]
+  (let [src      (some-> (post/post-ref p :source-dir)
+                         fs/path)
+        slug     (post/post-slug p)
+        base-url (str portfolio-prefix "/" slug "/files")
+        repo-url (str forge-base-url (repo-name slug))]
     [:div.post.project
      [:h1.main__title (post/post-title p)]
      [:div.post__metadata
@@ -156,6 +164,11 @@
        [:h4.post__subtitle (post/post-ref p :synopsis)]
        [:ul.tags
         (map (fn [tag] [:li.tag tag]) (post/post-tags p))]]]
+     (when repo-url
+       [:div.project__clone
+        [:pre
+         [:code
+          (str "git clone https://" domain portfolio-prefix "/" slug ".git")]]])
      (when (and src (fs/directory? src))
        [:div.project__files (repo/file-tree src base-url)])
      [:div.project__container (h/raw (post/post-content p))]]))
@@ -173,6 +186,16 @@
   [:div.portfolio
    [:div.main__title [:h1.portfolio__title title]]
    (into [:div.portfolio-entries] (portfolio-entries projects))])
+
+(def prism-css-builder
+  (fn [_site _posts]
+    [{:path "assets/css/highlight.css"
+      :content
+      (str
+       (slurp "node_modules/prismjs/themes/prism-tomorrow.css")
+       "\n"
+       (slurp
+        "node_modules/prismjs/plugins/line-numbers/prism-line-numbers.css"))}]))
 
 (defn cljs-builder
   [_site _posts]
@@ -255,8 +278,6 @@ correct practices. Particularly interested in functional programming."]]
       [:dl.list
        (contact-entry [:span "Email"]
                       [:span [:code "mail"] " at " [:code "$DOMAIN"]])
-       (contact-entry [:span "XMPP"]
-                      [:span [:code "migalmoreno"] " at " [:code "$DOMAIN"]])
        (contact-entry
         [:span "PGP"]
         (anchor [:code "4956 DAC8 B077 15EA 9F14  E13A EF1F 69BF 5F23 F458"]
@@ -280,10 +301,22 @@ correct practices. Particularly interested in functional programming."]]
    :posts-dir        "posts"
    :output-dir       "site"
    :readers          [(make-dir-tagging-reader org-reader)]
-   :builders         [cljs-builder index-builder portfolio-builder
-                      (let [builder (repo/repo-browser :prefix    portfolio-prefix
+   :builders         [cljs-builder prism-css-builder index-builder
+                      portfolio-builder
+                      (let [builder (repo/repo-browser :prefix portfolio-prefix
                                                        :layout-fn base-layout)]
-                        (fn [site posts] (builder site (filter project-posts? posts))))
+                        (fn [site posts]
+                          (builder site (filter project-posts? posts))))
+                      (let [builder (repo/repo-dumb-http
+                                     :prefix
+                                     portfolio-prefix
+                                     :base-url
+                                     forge-base-url
+                                     :slug->repo-name
+                                     repo-name
+                                     :exclude #{"nix-config" "guix-config"})]
+                        (fn [site posts]
+                          (builder site (filter project-posts? posts))))
                       blog-builder
                       contact-builder not-found-builder
                       (fn [site posts]

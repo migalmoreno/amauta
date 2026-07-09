@@ -20,6 +20,7 @@
         default = pkgs.mkShell {
           buildInputs = with pkgs; [
             clojure
+            git
             nodejs
             (emacs.pkgs.withPackages (
               epkgs: with epkgs; [
