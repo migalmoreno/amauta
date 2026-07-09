@@ -1,3 +1,0 @@
-#+SYNOPSIS: A libre streaming front-end for the web
-#+TAGS: clojure clojurescript
-#+LICENSE: AGPL-3.0

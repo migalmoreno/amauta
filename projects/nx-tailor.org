@@ -1,3 +1,0 @@
-#+SYNOPSIS: A theme manager for Nyxt
-#+TAGS: common-lisp browser
-#+LICENSE: BSD 3-Clause

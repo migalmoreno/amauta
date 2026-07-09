@@ -11,10 +11,11 @@
                    :main-opts  ["-m" "blog.site"]}
            :serve {:extra-deps {ring/ring-jetty-adapter {:mvn/version "1.12.2"}}
                    :main-opts  ["-m" "blog.ssg.serve"]}}
- :deps    {babashka/fs          {:mvn/version "0.5.34"}
+ :deps    {aero/aero            {:mvn/version "1.1.6"}
+           babashka/fs          {:mvn/version "0.5.34"}
            babashka/process     {:mvn/version "0.5.22"}
            hiccup/hiccup        {:mvn/version "2.0.0"}
            org.clojure/clojure  {:mvn/version "1.12.0"}
            org.clojure/data.xml {:mvn/version "0.2.0-alpha11"}
            ring/ring-core       {:mvn/version "1.12.2"}}
- :paths   ["src"]}
+ :paths   ["src" "resources"]}

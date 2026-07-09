@@ -2,15 +2,9 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     systems.url = "github:nix-systems/default";
-    tubo.url = "git+ssh://forgejo@auriga/migalmoreno/tubo";
-    nx-router.url = "git+ssh://forgejo@auriga/migalmoreno/nx-router";
-    nx-tailor.url = "git+ssh://forgejo@auriga/migalmoreno/nx-tailor";
-    nx-mosaic.url = "git+ssh://forgejo@auriga/migalmoreno/nx-mosaic";
-    fdroid-el.url = "git+ssh://forgejo@auriga/migalmoreno/fdroid.el";
-    nyxt-el.url = "git+ssh://forgejo@auriga/migalmoreno/nyxt.el";
   };
   outputs =
-    inputs@{ nixpkgs, systems, ... }:
+    { nixpkgs, systems, ... }:
     let
       eachSystem =
         f: nixpkgs.lib.genAttrs (import systems) (system: f (import nixpkgs { inherit system; }));
@@ -45,28 +39,7 @@
           ];
           shellHook = ''
             tmpdir=$(mktemp -d)
-            ${toString (
-              map
-                (name: ''
-                  (echo "#+SOURCE-DIR: ${inputs.${name}}" && cat ${./projects/${name}.org} ${
-                    if
-                      pkgs.lib.hasAttrByPath [
-                        "packages"
-                        pkgs.system
-                        "docs"
-                      ] inputs.${name}
-                    then
-                      "${inputs.${name}.packages.${pkgs.system}.docs}/index.org"
-                    else if builtins.pathExists "${inputs.${name}}/README.org" then
-                      "${inputs.${name}}/README.org"
-                    else
-                      "${inputs.${name}}/README"
-                  }) > $tmpdir/${name}.org
-                  ln -sf $tmpdir/${name}.org ./posts/projects/${name}.org
-                '')
-                (map (path: pkgs.lib.removeSuffix ".org" path) (builtins.attrNames (builtins.readDir ./projects)))
-            )}
-            cat > $tmpdir/preamble.el<< EOF
+            cat > $tmpdir/preamble.el << EOF
             (require 'ox-html-stable-ids)
             (org-html-stable-ids-add)
             (setq org-html-stable-ids t)

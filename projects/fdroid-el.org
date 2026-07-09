@@ -1,3 +1,0 @@
-#+SYNOPSIS: An Emacs interface to the F-Droid package repository
-#+TAGS: emacs-lisp emacs
-#+LICENSE: GPL-3.0+

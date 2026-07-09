@@ -16,7 +16,8 @@
    [blog.ssg.builders.blog :as blog]
    [blog.ssg.builders.atom :as atom]
    [blog.ssg.builders.assets :as assets]
-   [blog.ssg.builders.repo :as repo]))
+   [blog.ssg.builders.repo :as repo]
+   [blog.ssg.projects :as projects]))
 
 (def domain "migalmoreno.com")
 (def email "mail@migalmoreno.com")
@@ -24,9 +25,8 @@
 
 (def blog-prefix "/blog")
 (def portfolio-prefix "/projects")
-(def forge-base-url "ssh://forgejo@auriga/migalmoreno/")
 
-(defn- repo-name [slug] (str/replace slug #"-el$" ".el"))
+(def config (projects/read-config))
 
 (defn logo
   [&
@@ -154,7 +154,7 @@
                          fs/path)
         slug     (post/post-slug p)
         base-url (str portfolio-prefix "/" slug "/files")
-        repo-url (str forge-base-url (repo-name slug))]
+        no-serve (:no-serve (get (:projects config) (keyword slug)))]
     [:div.post.project
      [:h1.main__title (post/post-title p)]
      [:div.post__metadata
@@ -164,7 +164,7 @@
        [:h4.post__subtitle (post/post-ref p :synopsis)]
        [:ul.tags
         (map (fn [tag] [:li.tag tag]) (post/post-tags p))]]]
-     (when repo-url
+     (when-not no-serve
        [:div.project__clone
         [:pre
          [:code
@@ -304,19 +304,16 @@ correct practices. Particularly interested in functional programming."]]
    :builders         [cljs-builder prism-css-builder index-builder
                       portfolio-builder
                       (let [builder (repo/repo-browser :prefix portfolio-prefix
-                                                       :layout-fn base-layout)]
+                                                       :layout-fn base-layout
+                                                       :projects (:projects
+                                                                  config))]
                         (fn [site posts]
                           (builder site (filter project-posts? posts))))
-                      (let [builder (repo/repo-dumb-http
-                                     :prefix
-                                     portfolio-prefix
-                                     :base-url
-                                     forge-base-url
-                                     :slug->repo-name
-                                     repo-name
-                                     :exclude #{"nix-config" "guix-config"})]
-                        (fn [site posts]
-                          (builder site (filter project-posts? posts))))
+                      (repo/repo-dumb-http
+                       :prefix         portfolio-prefix
+                       :cache-dir      (:cache-dir config)
+                       :forge-base-url (:forge-base-url config)
+                       :projects       (:projects config))
                       blog-builder
                       contact-builder not-found-builder
                       (fn [site posts]

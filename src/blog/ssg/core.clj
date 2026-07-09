@@ -37,9 +37,10 @@
   Scans posts-dir, reads all posts, runs every builder, and writes the
   resulting artifacts to output-dir."
   [site]
-  (let [{:keys [posts-dir output-dir readers builders],
+  (let [{:keys [posts-dir output-dir readers builders prepare-fn],
          :or {posts-dir "posts", output-dir "site"}}
           site]
+    (when prepare-fn (prepare-fn))
     (println "Reading posts from" posts-dir "...")
     (let [defaults (:default-metadata site {})
           posts (cond->> (doall (reader/read-posts posts-dir readers))

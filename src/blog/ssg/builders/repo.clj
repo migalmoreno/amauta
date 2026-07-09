@@ -71,12 +71,17 @@
                      {:class (str "language-" (or (fs/extension f) "text"))}
                      content]]]])})))
 
-(defn- ensure-mirror!
-  "Clone url as a bare repo to git-dir if not present, or fetch updates if it is."
+(def ^:private mirrored (atom #{}))
+
+(defn ensure-mirror!
+  "Clone url as a bare repo to git-dir if not present, or fetch updates if it
+  is. Skips if already called for this git-dir in the current JVM session."
   [url git-dir]
-  (if (.exists (io/file git-dir "config"))
-    (proc/shell "git" "-C" git-dir "fetch")
-    (proc/shell "git" "clone" "--bare" url git-dir)))
+  (when-not (contains? @mirrored git-dir)
+    (if (.exists (io/file git-dir "config"))
+      (proc/shell "git" "-C" git-dir "fetch")
+      (proc/shell "git" "clone" "--bare" url git-dir))
+    (swap! mirrored conj git-dir)))
 
 (defn- read-packed-refs
   [git-dir]
@@ -122,37 +127,35 @@
 
 (defn repo-dumb-http
   "Return a builder that serves each project's git repo via the dumb HTTP
-  protocol. Clones and caches bare repos using git, generates the
-  info/refs and objects/info/packs index files in pure Clojure, then copies
-  the tree into the site output so users can clone with:
+  protocol. Generates info/refs and objects/info/packs index files, then
+  copies each bare repo into the site output so users can clone with:
     git clone https://<domain>/<prefix>/<slug>.git
 
+  Repos are mirrored via ensure-mirror! (no-op if already done this session
+  by projects/prepare!).
+
   Options:
-    :prefix    - URL prefix for git repos (default \"/projects\")
-    :cache-dir - local directory to cache bare repos (default \".git-cache\")"
-  [&
-   {:keys [prefix cache-dir base-url slug->repo-name exclude]
-    :or   {prefix          "/projects"
-           cache-dir       ".git-cache"
-           slug->repo-name identity
-           exclude         #{}}}]
-  (fn [_site posts]
-    (when base-url
-      (keep (fn [p]
-              (let [slug (post/post-slug p)]
-                (when-not (contains? exclude slug)
-                  (let [repo-url (str base-url (slug->repo-name slug))
-                        git-dir  (str cache-dir "/" slug ".git")]
-                    (println "Mirroring" repo-url "...")
-                    (try
-                      (ensure-mirror! repo-url git-dir)
-                      (write-info-refs! git-dir)
-                      (write-info-packs! git-dir)
-                      {:path       (str (subs prefix 1) "/" slug ".git")
-                       :copy-from  git-dir
-                       :directory? true}
-                      (catch Exception e
-                        (println "Warning: failed to mirror" repo-url
-                                 "-"                         (.getMessage e))
-                        nil))))))
-            posts))))
+    :prefix         - URL prefix (default \"/projects\")
+    :cache-dir      - bare repo cache directory (default \".git-cache\")
+    :forge-base-url - base SSH URL for cloning (e.g. \"ssh://forgejo@host/org/\")
+    :projects       - map of keyword-slug -> project map (from config.edn)"
+  [& {:keys [prefix cache-dir forge-base-url projects]
+      :or   {prefix    "/projects"
+             cache-dir ".git-cache"}}]
+  (fn [_site _posts]
+    (keep (fn [[slug-kw {:keys [repo-name no-serve]}]]
+            (when-not no-serve
+              (let [slug    (name slug-kw)
+                    git-dir (str cache-dir "/" slug ".git")]
+                (try
+                  (when forge-base-url
+                    (ensure-mirror! (str forge-base-url repo-name) git-dir))
+                  (write-info-refs! git-dir)
+                  (write-info-packs! git-dir)
+                  {:path      (str (subs prefix 1) "/" slug ".git")
+                   :copy-from git-dir
+                   :directory? true}
+                  (catch Exception e
+                    (println "Warning: failed to serve" slug "-" (.getMessage e))
+                    nil)))))
+          (or projects {}))))

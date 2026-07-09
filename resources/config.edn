@@ -1,0 +1,42 @@
+{:forge-base-url "ssh://forgejo@auriga/migalmoreno/"
+ :cache-dir ".git-cache"
+ :projects
+ {:alegoria    {:repo-name "alegoria"
+                :synopsis  "A libre gallery aggregator for the web"
+                :tags      ["typescript" "python"]
+                :license   "AGPL-3.0"}
+  :tubo        {:repo-name "tubo"
+                :synopsis  "A libre streaming aggregator for the web"
+                :tags      ["clojure" "clojurescript"]
+                :license   "AGPL-3.0"}
+  :nx-router   {:repo-name "nx-router"
+                :synopsis  "A declarative URL routing extension for Nyxt"
+                :tags      ["common-lisp" "browser"]
+                :license   "BSD 3-Clause"}
+  :nx-tailor   {:repo-name "nx-tailor"
+                :synopsis  "A theme manager for Nyxt"
+                :tags      ["common-lisp" "browser"]
+                :license   "BSD 3-Clause"}
+  :nx-mosaic   {:repo-name "nx-mosaic"
+                :synopsis  "A theme manager for Nyxt"
+                :tags      ["common-lisp" "browser"]
+                :license   "BSD 3-Clause"}
+  :fdroid-el   {:repo-name "fdroid.el"
+                :synopsis  "An Emacs interface for F-Droid"
+                :tags      ["emacs-lisp"]
+                :license   "GPL-3.0"}
+  :nyxt-el     {:repo-name "nyxt.el"
+                :synopsis  "An Emacs interface for Nyxt"
+                :tags      ["emacs-lisp"]
+                :license   "GPL-3.0"}
+  :nix-config  {:repo-name "nix-config"
+                :synopsis  "Personal Nix configuration"
+                :tags      ["nix"]
+                :license   "GPL-3.0"
+                :no-serve  true
+                :redacted  #{"secrets.yaml"}}
+  :guix-config {:repo-name "guix-config"
+                :synopsis  "Personal Guix configuration"
+                :tags      ["guix"]
+                :license   "GPL-3.0"
+                :no-serve  true}}}
