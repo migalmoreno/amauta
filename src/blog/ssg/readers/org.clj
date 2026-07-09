@@ -92,8 +92,8 @@
 (defn- ensure-daemon!
   []
   (when (and (:use-emacsclient config) (not (daemon-running?)))
-    (proc/sh ["emacs" (str "--daemon=" (:daemon-name config)) "--no-init-file"
-              "--no-splash"])))
+    (proc/process ["emacs" (str "--daemon=" (:daemon-name config)) "-Q" "-nw"])
+    (Thread/sleep 2000)))
 
 (def ^:private emacs-timeout-ms 10000)
 
