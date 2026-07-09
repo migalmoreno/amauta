@@ -11,7 +11,7 @@
    [shadow.cljs.devtools.server :as shadow-server]
    [blog.ssg.core :as core]
    [blog.ssg.post :as post]
-   [blog.ssg.readers.org :refer [org-reader]]
+   [blog.ssg.readers.org :refer [org-reader stop-daemon!]]
    [blog.ssg.readers.dir-tagging :refer [make-dir-tagging-reader]]
    [blog.ssg.builders.blog :as blog]
    [blog.ssg.builders.atom :as atom]
@@ -300,6 +300,7 @@ correct practices. Particularly interested in functional programming."]]
    :default-metadata {:author fullname :email email}
    :posts-dir        "posts"
    :output-dir       "site"
+   :prepare-fn       (fn [] (stop-daemon!) (projects/prepare! "posts"))
    :readers          [(make-dir-tagging-reader org-reader)]
    :builders         [cljs-builder prism-css-builder index-builder
                       portfolio-builder
