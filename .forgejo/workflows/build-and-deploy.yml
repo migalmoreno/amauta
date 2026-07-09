@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build
         env:
-          GIT_SSH_COMMAND: ssh -o StrictHostKeyChecking=no
+          FORGE_BASE_URL: ${{ github.server_url }}/migalmoreno/
         run: nix develop --command bash -c "npm install && clojure -M:build"
       - name: Deploy to Cloudflare Pages
         env:

@@ -1,4 +1,4 @@
-{:forge-base-url "ssh://forgejo@auriga/migalmoreno/"
+{:forge-base-url #or [#env FORGE_BASE_URL "ssh://forgejo@auriga/migalmoreno/"]
  :cache-dir ".git-cache"
  :projects
  {:alegoria    {:repo-name "alegoria"
