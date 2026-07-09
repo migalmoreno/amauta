@@ -148,19 +148,22 @@
       :or   {prefix    "/projects"
              cache-dir ".git-cache"}}]
   (fn [_site _posts]
-    (keep (fn [[slug-kw {:keys [repo-name no-serve]}]]
-            (when-not no-serve
-              (let [slug    (name slug-kw)
-                    git-dir (str cache-dir "/" slug ".git")]
-                (try
-                  (when forge-base-url
-                    (ensure-mirror! (str forge-base-url repo-name) git-dir))
-                  (write-info-refs! git-dir)
-                  (write-info-packs! git-dir)
-                  {:path      (str (subs prefix 1) "/" slug ".git")
-                   :copy-from git-dir
-                   :directory? true}
-                  (catch Exception e
-                    (println "Warning: failed to serve" slug "-" (.getMessage e))
-                    nil)))))
-          (or projects {}))))
+    (mapcat (fn [[slug-kw {:keys [repo-name no-serve]}]]
+              (when-not no-serve
+                (let [slug    (name slug-kw)
+                      git-dir (str cache-dir "/" slug ".git")]
+                  (try
+                    (when forge-base-url
+                      (ensure-mirror! (str forge-base-url repo-name) git-dir))
+                    (write-info-refs! git-dir)
+                    (write-info-packs! git-dir)
+                    [{:path      (str (subs prefix 1) "/" slug ".git")
+                      :copy-from git-dir
+                      :directory? true}
+                     {:path      (str (subs prefix 1) "/" slug)
+                      :copy-from git-dir
+                      :directory? true}]
+                    (catch Exception e
+                      (println "Warning: failed to serve" slug "-" (.getMessage e))
+                      nil)))))
+            (or projects {}))))
