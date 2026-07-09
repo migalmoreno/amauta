@@ -1,0 +1,20 @@
+name: Build and deploy site
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-deploy:
+    runs-on: auriga:host
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: nix develop --command bash -c "npm install && clojure -M:build"
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CF_API_TOKEN }}
+          accountId: ${{ secrets.CF_ACCOUNT_ID }}
+          command: pages deploy ./site --project=${{ vars.CF_PAGES_PROJECT }}
