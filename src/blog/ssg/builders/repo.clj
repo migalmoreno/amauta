@@ -42,8 +42,9 @@
 
   Options:
     :prefix    - URL prefix for project pages (default \"/projects\")
-    :layout-fn - page layout fn (fn [site title body] -> html-string)"
-  [& {:keys [prefix layout-fn] :or {prefix "/projects"}}]
+    :layout-fn - page layout fn (fn [site title body] -> html-string)
+    :projects  - projects map from config.edn (for :redacted patterns)"
+  [& {:keys [prefix layout-fn projects] :or {prefix "/projects"}}]
   (fn [site posts]
     (for [p     posts
           :let  [src (some-> (post/post-ref p :source-dir)
@@ -51,12 +52,15 @@
           :when (and src (fs/directory? src))
           :let  [slug        (post/post-slug p)
                  project-url (str prefix "/" slug ".html")
-                 base-url    (str prefix "/" slug "/files")]
+                 base-url    (str prefix "/" slug "/files")
+                 redacted    (get-in projects [(keyword slug) :redacted])]
           f     (fs/glob src "**")
           :when (and (fs/regular-file? f) (visible? src f))
-          :let  [rel     (str (fs/relativize src f))
-                 content (try (slurp (fs/file f)) (catch Exception _ nil))]
-          :when content]
+          :let  [rel   (str (fs/relativize src f))
+                 hide? (boolean (some #(re-find (re-pattern %) rel) redacted))]
+          :when (or hide? (try (slurp (fs/file f)) (catch Exception _ nil)))
+          :let  [content (when-not hide? (try (slurp (fs/file f)) (catch Exception _ nil)))]
+          :when (or hide? content)]
       {:path    (str (subs base-url 1) "/" rel ".html")
        :content (layout-fn
                  site
@@ -66,10 +70,11 @@
                    [:a {:href project-url} slug]
                    [:span "/" rel]]
                   [:div.file-view__content
-                   [:pre.line-numbers
-                    [:code
-                     {:class (str "language-" (or (fs/extension f) "text"))}
-                     content]]]])})))
+                   (if hide?
+                     [:pre]
+                     [:pre.line-numbers
+                      [:code {:class (str "language-" (or (fs/extension f) "text"))}
+                       content]])]])})))
 
 (def ^:private mirrored (atom #{}))
 
