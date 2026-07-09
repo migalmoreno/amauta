@@ -777,6 +777,56 @@ pre.line-numbers {
   border-radius: 0;
 }
 
+.clone-url {
+  display: flex;
+  align-items: center;
+  width: fit-content;
+  border: 1px solid var(--border-dim);
+  border-radius: 6px;
+  overflow: hidden;
+  margin: 1rem 0 1rem auto;
+  font-family: monospace;
+  font-size: 0.85rem;
+}
+
+.clone-url__protocol {
+  padding: 6px 10px;
+  background: var(--bg-dim);
+  border-right: 1px solid var(--border-dim);
+  white-space: nowrap;
+  color: var(--fg-dim);
+  user-select: none;
+}
+
+.clone-url__input {
+  border: none;
+  background: transparent;
+  padding: 6px 10px;
+  color: var(--fg-main);
+  outline: none;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.clone-url__copy {
+  padding: 6px 10px;
+  margin: 0;
+  min-width: 4.5rem;
+  border: none;
+  border-left: 1px solid var(--border-dim);
+  background: var(--bg-dim);
+  cursor: pointer;
+  color: var(--fg-main);
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  white-space: nowrap;
+}
+
+.clone-url__copy:hover {
+  background: var(--bg-active);
+}
+
 .project__files {
   border: 1px solid var(--border-dim);
   border-radius: 6px;

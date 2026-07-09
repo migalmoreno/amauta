@@ -29,7 +29,17 @@
     (aset langs "el"   (.-lisp langs))
     (aset langs "scm"  (.-scheme langs))))
 
+(defn- setup-clone-copy! []
+  (when-let [btn (.querySelector js/document ".clone-url__copy")]
+    (.addEventListener btn "click"
+      (fn []
+        (let [input (.querySelector (.-parentElement btn) ".clone-url__input")]
+          (-> js/navigator .-clipboard (.writeText (.-value input)))
+          (set! (.-textContent btn) "Copied!")
+          (js/setTimeout #(set! (.-textContent btn) "Copy") 2000))))))
+
 (defn init! []
   (set-year!)
   (register-aliases!)
+  (setup-clone-copy!)
   (.highlightAll Prism))
