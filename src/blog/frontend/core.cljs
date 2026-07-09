@@ -10,7 +10,9 @@
             ["prismjs/components/prism-go"]
             ["prismjs/components/prism-yaml"]
             ["prismjs/components/prism-json"]
-            ["prismjs/components/prism-typescript"]))
+            ["prismjs/components/prism-typescript"]
+            ["prismjs/components/prism-lisp"]
+            ["prismjs/components/prism-scheme"]))
 
 (defn- set-year! []
   (when-let [el (.getElementById js/document "footer-year")]
@@ -23,7 +25,9 @@
     (aset langs "cljc" (.-clojure langs))
     (aset langs "edn"  (.-clojure langs))
     (aset langs "sh"   (.-bash langs))
-    (aset langs "yml"  (.-yaml langs))))
+    (aset langs "yml"  (.-yaml langs))
+    (aset langs "el"   (.-lisp langs))
+    (aset langs "scm"  (.-scheme langs))))
 
 (defn init! []
   (set-year!)
