@@ -3,6 +3,7 @@
     "prismjs": "^1.0.0"
   },
   "devDependencies": {
-    "wrangler": "^4.0.0"
+    "wrangler": "^4.0.0",
+    "@cloudflare/workerd-linux-arm64": "*"
   }
 }
