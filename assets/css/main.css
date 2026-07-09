@@ -752,7 +752,6 @@ figcaption {
   font-family: monospace;
   font-size: 0.9rem;
   padding: 12px 16px;
-  border-bottom: 1px solid var(--border-dim);
   background: var(--bg-dim);
   overflow-x: auto;
   white-space: nowrap;
