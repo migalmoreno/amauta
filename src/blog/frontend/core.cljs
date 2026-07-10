@@ -34,7 +34,7 @@
     (.addEventListener btn "click"
       (fn []
         (let [input (.querySelector (.-parentElement btn) ".clone-url__input")]
-          (-> js/navigator .-clipboard (.writeText (.-value input)))
+          (-> js/navigator .-clipboard (.writeText (.getAttribute input "data-url")))
           (set! (.-textContent btn) "Copied!")
           (js/setTimeout #(set! (.-textContent btn) "Copy") 2000))))))
 

@@ -165,11 +165,16 @@
        [:ul.tags
         (map (fn [tag] [:li.tag tag]) (post/post-tags p))]]]
      (when-not no-serve
-       (let [clone-url (str "https://" domain portfolio-prefix "/" slug)]
+       (let [clone-url   (str "https://" domain portfolio-prefix "/" slug)
+             display-url (subs clone-url (count "https://"))]
          [:div.clone-url
           [:span.clone-url__protocol "HTTPS"]
           [:input.clone-url__input
-           {:type "text" :readonly true :value clone-url :size (count clone-url)}]
+           {:type     "text"
+            :readonly true
+            :value    display-url
+            :size     (count display-url)
+            :data-url clone-url}]
           [:button.clone-url__copy "Copy"]]))
      (when (and src (fs/directory? src))
        [:div.project__files (repo/file-tree src base-url)])
