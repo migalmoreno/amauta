@@ -143,7 +143,8 @@
   (spit (cache-file hash "content") html))
 
 (def ^:private default-extra-keys
-  ["CROSSPOST" "SCRIPTS" "META-TAGS" "LICENSE" "SYNOPSIS" "SOURCE-DIR"])
+  ["CROSSPOST" "SCRIPTS" "META-TAGS" "LICENSE" "SYNOPSIS" "SOURCE-DIR"
+   "REPO-NAME"])
 
 (defn- collect-metadata-raw
   "Call Emacs to collect org keywords; returns a map of keyword->string."

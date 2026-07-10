@@ -9,19 +9,29 @@
    [clojure.java.io :as io]
    [clojure.string :as str]))
 
-(defn read-config []
+(defn read-config
+  []
   (aero/read-config (io/resource "config.edn")))
 
-(defn- extract-archive! [git-dir out-dir]
+(defn- extract-archive!
+  [git-dir out-dir]
   (let [tar-file (str (fs/temp-dir) "/ssg-" (fs/file-name out-dir) ".tar")]
     (try
-      (proc/shell "git" "-C" git-dir "archive" "--format=tar" "--output" tar-file "HEAD")
+      (proc/shell "git"
+                  "-C"
+                  git-dir
+                  "archive"
+                  "--format=tar"
+                  "--output"
+                  tar-file
+                  "HEAD")
       (when (fs/exists? out-dir) (fs/delete-tree out-dir))
       (fs/create-dirs out-dir)
       (proc/shell "tar" "-xf" tar-file "-C" (str out-dir))
       (finally (fs/delete-if-exists tar-file)))))
 
-(defn- find-readme [src-dir]
+(defn- find-readme
+  [src-dir]
   (some #(let [f (str src-dir "/" %)]
            (when (fs/exists? f) (slurp f)))
         ["README.org" "README"]))
@@ -56,4 +66,5 @@
           (extract-archive! git-dir src-dir)
           (write-org-file! posts-dir src-dir slug project)
           (catch Exception e
-            (println "Warning: failed to prepare" slug "-" (.getMessage e))))))))
+            (println "Warning: failed to prepare" slug
+                     "-"                          (.getMessage e))))))))
