@@ -781,6 +781,7 @@ pre.line-numbers {
   display: flex;
   align-items: center;
   width: fit-content;
+  max-width: 100%;
   border: 1px solid var(--border-dim);
   border-radius: 6px;
   overflow: hidden;
@@ -806,6 +807,7 @@ pre.line-numbers {
   outline: none;
   font-family: inherit;
   font-size: inherit;
+  min-width: 0;
 }
 
 .clone-url__copy {
