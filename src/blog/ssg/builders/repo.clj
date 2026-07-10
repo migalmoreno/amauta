@@ -15,7 +15,6 @@
 (defn- dir-children
   [dir]
   (->> (fs/list-dir dir)
-       (remove hidden?)
        (sort-by (fn [f] [(if (fs/directory? f) 0 1) (str (fs/file-name f))]))))
 
 (defn file-tree
@@ -55,7 +54,7 @@
                  base-url    (str prefix "/" slug "/files")
                  redacted    (get-in projects [(keyword slug) :redacted])]
           f     (fs/glob src "**")
-          :when (and (fs/regular-file? f) (visible? src f))
+          :when (fs/regular-file? f)
           :let  [rel   (str (fs/relativize src f))
                  hide? (boolean (some #(re-find (re-pattern %) rel) redacted))]
           :when (or hide? (try (slurp (fs/file f)) (catch Exception _ nil)))
