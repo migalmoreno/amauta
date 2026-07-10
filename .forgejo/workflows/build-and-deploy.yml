@@ -14,9 +14,10 @@ jobs:
         env:
           FORGE_BASE_URL: ${{ github.server_url }}/migalmoreno/
           HOME: /tmp/runner-home
+          npm_config_cache: ${{ github.workspace }}/.npm-cache
         run: |
           mkdir -p /tmp/runner-home /tmp/npm-work
-          rm -rf /tmp/runner-home/.npm /tmp/npm-work
+          rm -rf /tmp/npm-work
           mkdir -p /tmp/npm-work
           cp package.json /tmp/npm-work/
           npm install --prefix /tmp/npm-work
