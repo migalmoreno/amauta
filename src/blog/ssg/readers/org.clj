@@ -95,7 +95,7 @@
     (proc/process ["emacs" (str "--daemon=" (:daemon-name config)) "-Q"])
     (Thread/sleep 2000)))
 
-(def ^:private emacs-timeout-ms 30000)
+(def ^:private emacs-timeout-ms 60000)
 
 (defn- run-emacs
   [form-str]
