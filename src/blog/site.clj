@@ -87,7 +87,7 @@
            [:div.project-item__heading
             [:a.project-item__title
              {:href (blog/post-uri portfolio-prefix post)}
-             (post/post-title post)]]
+             (or (post/post-ref post :repo-name) (post/post-title post))]]
            [:div.project-item__synopsis
             [:span (post/post-ref post :synopsis)]]]
           [:ul.tags
@@ -156,7 +156,7 @@
         base-url (str portfolio-prefix "/" slug "/files")
         no-serve (:no-serve (get (:projects config) (keyword slug)))]
     [:div.post.project
-     [:h1.main__title (post/post-title p)]
+     [:h1.main__title (or (post/post-ref p :repo-name) (post/post-title p))]
      [:div.post__metadata
       [:div.post__metadata-items
        (post/post-ref p :license)]

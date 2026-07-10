@@ -36,13 +36,15 @@
            (when (fs/exists? f) (slurp f)))
         ["README.org" "README"]))
 
-(defn- write-org-file! [posts-dir src-dir slug {:keys [synopsis tags license]}]
-  (let [lines   (cond-> [(str "#+SOURCE-DIR: " (str (fs/absolutize src-dir)))]
-                  synopsis (conj (str "#+SYNOPSIS: " synopsis))
-                  tags     (conj (str "#+TAGS: "    (str/join " " tags)))
-                  license  (conj (str "#+LICENSE: " license)))
-        readme  (find-readme src-dir)
-        content (str (or readme "") "\n" (str/join "\n" lines) "\n")
+(defn- write-org-file!
+  [posts-dir src-dir slug {:keys [repo-name synopsis tags license]}]
+  (let [lines    (cond-> [(str "#+SOURCE-DIR: " (fs/absolutize src-dir))]
+                   repo-name (conj (str "#+REPO-NAME: " repo-name))
+                   synopsis  (conj (str "#+SYNOPSIS: " synopsis))
+                   tags      (conj (str "#+TAGS: " (str/join " " tags)))
+                   license   (conj (str "#+LICENSE: " license)))
+        readme   (find-readme src-dir)
+        content  (str (or readme "") "\n" (str/join "\n" lines) "\n")
         org-file (str posts-dir "/projects/" slug ".org")]
     (when (or (not (fs/exists? org-file))
               (not= content (slurp org-file)))
