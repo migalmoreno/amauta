@@ -11,15 +11,15 @@
                 :license   "AGPL-3.0"}
   :nx-router   {:repo-name "nx-router"
                 :synopsis  "A declarative URL routing extension for Nyxt"
-                :tags      ["common-lisp" "browser"]
+                :tags      ["common-lisp" "nyxt"]
                 :license   "BSD 3-Clause"}
   :nx-tailor   {:repo-name "nx-tailor"
                 :synopsis  "A theme manager for Nyxt"
-                :tags      ["common-lisp" "browser"]
+                :tags      ["common-lisp" "nyxt"]
                 :license   "BSD 3-Clause"}
   :nx-mosaic   {:repo-name "nx-mosaic"
                 :synopsis  "A theme manager for Nyxt"
-                :tags      ["common-lisp" "browser"]
+                :tags      ["common-lisp" "nyxt"]
                 :license   "BSD 3-Clause"}
   :fdroid-el   {:repo-name "fdroid.el"
                 :synopsis  "An Emacs interface for F-Droid"
@@ -27,7 +27,7 @@
                 :license   "GPL-3.0"}
   :nyxt-el     {:repo-name "nyxt.el"
                 :synopsis  "An Emacs interface for Nyxt"
-                :tags      ["emacs-lisp"]
+                :tags      ["emacs-lisp" "nyxt"]
                 :license   "GPL-3.0"}
   :nix-config  {:repo-name "nix-config"
                 :synopsis  "Personal Nix configuration"
