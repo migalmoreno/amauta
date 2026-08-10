@@ -1,0 +1,10 @@
+# -*- mode: org; org-html-head-include-default-style: nil; org-html-postamble: nil;  -*-
+#+OPTIONS: toc:nil num:nil
+#+title: Blog
+To build the site, enter a Clojure file via =cider-jack-in-clj= and run this:
+
+#+begin_src clojure
+user> (serve!)
+#+end_src
+
+This should build the site by statically generating the HTML files and compiling the front-end files.
