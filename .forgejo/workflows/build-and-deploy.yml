@@ -15,17 +15,19 @@ jobs:
           FORGE_BASE_URL: ${{ github.server_url }}/migalmoreno/
           HOME: /tmp/runner-home
           npm_config_cache: ${{ github.workspace }}/.npm-cache
-          npm_config_tmp: ${{ github.workspace }}/.npm-tmp
+          TMPDIR: ${{ github.workspace }}/.npm-tmp
         run: |
-          mkdir -p /tmp/runner-home /tmp/npm-work
+          mkdir -p /tmp/runner-home ${{ github.workspace }}/.npm-tmp
           rm -rf /tmp/npm-work
           mkdir -p /tmp/npm-work
           cp package.json /tmp/npm-work/
-          npm install --prefix /tmp/npm-work
+          npm install --prefix /tmp/npm-work --omit=dev
           ln -sfn /tmp/npm-work/node_modules ./node_modules
           nix develop --command bash -c "clojure -M:build"
       - name: Deploy to Cloudflare Pages
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CF_ACCOUNT_ID }}
+          npm_config_cache: ${{ github.workspace }}/.npm-cache
+          TMPDIR: ${{ github.workspace }}/.npm-tmp
         run: npx wrangler pages deploy ./site --project-name=${{ vars.CF_PAGES_PROJECT }} --branch=main
