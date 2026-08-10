@@ -31,7 +31,8 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CF_ACCOUNT_ID }}
           HOME: /tmp/runner-home
           npm_config_cache: ${{ github.workspace }}/.npm-cache
+          npm_config_ignore_scripts: "true"
           TMPDIR: ${{ github.workspace }}/.npm-tmp
         run: |
           mkdir -p ${{ github.workspace }}/.npm-tmp
-          npx --loglevel verbose wrangler pages deploy ./site --project-name=${{ vars.CF_PAGES_PROJECT }} --branch=main
+          npx wrangler pages deploy ./site --project-name=${{ vars.CF_PAGES_PROJECT }} --branch=main
