@@ -11,12 +11,14 @@ jobs:
     runs-on: auriga
     steps:
       - uses: actions/checkout@v4
-      - name: Build
+      - name: Build and deploy
         env:
           FORGE_BASE_URL: ${{ github.server_url }}/migalmoreno/
           HOME: /tmp/runner-home
           npm_config_cache: ${{ github.workspace }}/.npm-cache
           TMPDIR: /tmp/ci
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
         run: |
           mkdir -p /tmp/runner-home /tmp/ci
           rm -rf /tmp/npm-work
@@ -24,9 +26,4 @@ jobs:
           cp package.json /tmp/npm-work/
           npm install --prefix /tmp/npm-work --omit=dev
           ln -sfn /tmp/npm-work/node_modules ./node_modules
-          nix develop --command bash -c "clojure -M:build"
-      - name: Deploy to Cloudflare Pages
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CF_ACCOUNT_ID }}
-        run: nix develop --command wrangler pages deploy ./site --project-name=${{ vars.CF_PAGES_PROJECT }} --branch=main
+          nix develop --command bash -c "clojure -M:build && wrangler pages deploy ./site --project-name=${{ vars.CF_PAGES_PROJECT }} --branch=main"
