@@ -22,7 +22,7 @@ jobs:
           rm -rf /tmp/npm-work
           mkdir -p /tmp/npm-work
           cp package.json /tmp/npm-work/
-          npm install --prefix /tmp/npm-work --omit=optional
+          npm install --prefix /tmp/npm-work --omit=optional --ignore-scripts
           ln -sfn /tmp/npm-work/node_modules ./node_modules
           nix develop --command bash -c "clojure -M:build"
       - name: Deploy to Cloudflare Pages
