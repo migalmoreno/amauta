@@ -240,6 +240,8 @@
        (let [{:keys [handler last-y]} (or scroll-state {})]
          (when handler (.removeEventListener js/window "scroll" handler))
          (swap! state assoc :path nil :content nil :error nil)
+         (when-let [container (.querySelector js/document ".project__container")]
+           (set! (.-display (.-style container)) ""))
          (js/setTimeout
           (fn []
             (let [y (.-scrollY js/window)]
@@ -261,7 +263,9 @@
                  (.add (.-classList navbar) "navbar--hidden"))
                (.scrollIntoView el #js {:block "start" :behavior "instant"})
                (when last-y (reset! last-y (.-scrollY js/window)))
-               (when handler (.addEventListener js/window "scroll" handler)))))
+               (when handler (.addEventListener js/window "scroll" handler))))
+           (when-let [container (.querySelector js/document ".project__container")]
+             (set! (.-display (.-style container)) "none")))
          (swap! state assoc :path path :content nil :error nil)
          (-> (git/resolveRef #js {:fs fs :dir dir :gitdir dir :ref "HEAD"})
              (.then
