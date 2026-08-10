@@ -32,6 +32,7 @@ jobs:
           npm_config_cache: ${{ github.workspace }}/.npm-cache
           TMPDIR: ${{ github.workspace }}/.npm-tmp
         run: |
-          mkdir -p ${{ github.workspace }}/.npm-tmp
+          mkdir -p ${{ github.workspace }}/.npm-tmp ${{ github.workspace }}/.npm-wrangler
+          cp package.json ${{ github.workspace }}/.npm-wrangler/
           npm install --prefix ${{ github.workspace }}/.npm-wrangler
           ${{ github.workspace }}/.npm-wrangler/node_modules/.bin/wrangler pages deploy ./site --project-name=${{ vars.CF_PAGES_PROJECT }} --branch=main
