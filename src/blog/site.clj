@@ -169,20 +169,13 @@
        [:h4.post__subtitle (post/post-ref p :synopsis)]
        [:ul.tags
         (map (fn [tag] [:li.tag tag]) (post/post-tags p))]]]
-     (when-not no-serve
-       (let [clone-url   (str "https://" domain portfolio-prefix "/" slug)
-             display-url (subs clone-url (count "https://"))]
-         [:div.clone-url
-          [:span.clone-url__protocol "HTTPS"]
-          [:input.clone-url__input
-           {:type     "text"
-            :readonly true
-            :value    display-url
-            :size     (count display-url)
-            :data-url clone-url}]
-          [:button.clone-url__copy "Copy"]]))
-     (when (and src (fs/directory? src))
-       [:div.project__files (repo/file-tree src base-url)])
+     (let [clone-url   (str "https://" domain portfolio-prefix "/" slug)
+           display-url (subs clone-url (count "https://"))]
+       [:div
+        {:data-clone-url   clone-url
+         :data-display-url display-url}])
+     [:div.project__files
+      {:data-git-url (str portfolio-prefix "/" slug ".git")}]
      [:div.project__container (h/raw (post/post-content p))]]))
 
 (defn blog-collection-template
@@ -316,12 +309,6 @@ correct practices. Particularly interested in functional programming."]]
    :readers          [(make-dir-tagging-reader org-reader)]
    :builders         [cljs-builder prism-css-builder index-builder
                       portfolio-builder
-                      (let [builder (repo/repo-browser :prefix portfolio-prefix
-                                                       :layout-fn base-layout
-                                                       :projects (:projects
-                                                                  config))]
-                        (fn [site posts]
-                          (builder site (filter project-posts? posts))))
                       (repo/repo-dumb-http
                        :prefix         portfolio-prefix
                        :cache-dir      (:cache-dir config)

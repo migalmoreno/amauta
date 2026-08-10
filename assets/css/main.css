@@ -53,10 +53,6 @@
   box-sizing: border-box;
 }
 
-html {
-  scroll-padding-top: var(--navbar-height);
-}
-
 body {
   background-color: var(--bg-main);
   color: var(--fg-main);
@@ -64,7 +60,6 @@ body {
   line-height: 1.7;
   font-size: 18px;
   padding: 0;
-  margin: 0;
   margin: var(--navbar-height) auto 0;
 }
 
@@ -206,6 +201,17 @@ code {
   z-index: 10;
   padding-top: 20px;
   background: var(--bg-main);
+  transition: top 0.3s ease;
+}
+
+.navbar--hidden {
+  padding-top: 0px;
+  top: calc(-1 * var(--navbar-height) - 2px);
+  transition: none;
+}
+
+.navbar--instant {
+  transition: none;
 }
 
 .navbar__nav {
@@ -641,7 +647,7 @@ figcaption {
   font-size: 1rem;
 }
 
-.project-item .tag {
+.project-item .tag:not(pre .tag) {
   background: var(--border-dim);
 }
 
@@ -652,7 +658,7 @@ figcaption {
   padding: 0;
 }
 
-.tag {
+.tag:not(pre .tag) {
   list-style: none;
   background: var(--bg-dim);
   border-radius: 8px;
@@ -745,7 +751,8 @@ figcaption {
 }
 
 .file-view {
-  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
 }
 
 .file-view__header {
@@ -766,9 +773,9 @@ pre.line-numbers {
   overflow-y: hidden;
 }
 
-.file-view__content pre,
-.file-view__content pre[class*="language-"],
-.file-view__content code[class*="language-"] {
+.file-view pre,
+.file-view pre[class*="language-"],
+.file-view code[class*="language-"] {
   margin: 0;
   padding: 0;
   overflow-x: auto;
@@ -1056,7 +1063,7 @@ div[id*="container-ordenada"] p:has(i):has(a) > a {
     font-size: 0.9rem;
   }
 
-  .tag {
+  .tag:not(pre .tag) {
     font-size: 0.7rem;
   }
 
