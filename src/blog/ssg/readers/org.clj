@@ -93,7 +93,10 @@
   []
   (when (and (:use-emacsclient config) (not (daemon-running?)))
     (proc/process ["emacs" (str "--daemon=" (:daemon-name config)) "-Q"])
-    (Thread/sleep 2000)))
+    (loop [remaining 20]
+      (Thread/sleep 500)
+      (when (and (pos? remaining) (not (daemon-running?)))
+        (recur (dec remaining))))))
 
 (def ^:private emacs-timeout-ms 60000)
 
