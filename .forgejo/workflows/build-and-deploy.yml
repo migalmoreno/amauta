@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
@@ -32,4 +33,5 @@ jobs:
           TMPDIR: ${{ github.workspace }}/.npm-tmp
         run: |
           mkdir -p ${{ github.workspace }}/.npm-tmp
-          npx wrangler pages deploy ./site --project-name=${{ vars.CF_PAGES_PROJECT }} --branch=main
+          npm install --prefix ${{ github.workspace }}/.npm-wrangler
+          ${{ github.workspace }}/.npm-wrangler/node_modules/.bin/wrangler pages deploy ./site --project-name=${{ vars.CF_PAGES_PROJECT }} --branch=main
