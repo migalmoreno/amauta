@@ -5,11 +5,5 @@
     "@isomorphic-git/lightning-fs": "^4.0.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0"
-  },
-  "devDependencies": {
-    "wrangler": "^4.0.0"
-  },
-  "optionalDependencies": {
-    "@cloudflare/workerd-linux-arm64": "*"
   }
 }
