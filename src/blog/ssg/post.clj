@@ -1,8 +1,10 @@
 (ns blog.ssg.post
-  (:require [clojure.string :as str])
-  (:import [java.time LocalDate LocalDateTime]
-           [java.time.format DateTimeFormatter]
-           [java.util Locale]))
+  (:require
+   [clojure.string :as str])
+  (:import
+   [java.time LocalDate LocalDateTime]
+   [java.time.format DateTimeFormatter]
+   [java.util Locale]))
 
 (def ^:private fmt-full
   (DateTimeFormatter/ofPattern "yyyy-MM-dd EEE HH:mm" Locale/ENGLISH))
@@ -16,7 +18,9 @@
 (defn parse-org-date
   "Parse an org-mode date string like <2023-01-22 Sun 19:13> or <2023-01-22 Sun>."
   [s]
-  (let [s (-> s (str/replace #"[<>]" "") str/trim)]
+  (let [s (-> s
+              (str/replace #"[<>]" "")
+              str/trim)]
     (try
       (LocalDateTime/parse s fmt-full)
       (catch Exception _
@@ -26,6 +30,8 @@
   "Format a LocalDateTime for human display."
   [date]
   (.format date fmt-display))
+
+(defn ->slug [s] (str/replace s "." "-"))
 
 (defn post-title [post] (:title post))
 (defn post-date [post] (:date post))
@@ -37,10 +43,10 @@
 (defn make-post
   "Construct a post map from a slug, parsed metadata map, and raw HTML content string."
   [slug metadata content]
-  {:slug slug
-   :title (:title metadata "Untitled")
-   :date (:date metadata)
-   :content content
+  {:slug     slug
+   :title    (:title metadata "Untitled")
+   :date     (:date metadata)
+   :content  content
    :metadata (dissoc metadata :title :date)})
 
 (defn posts-reverse-chronological

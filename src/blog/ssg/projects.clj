@@ -6,6 +6,7 @@
    [babashka.fs :as fs]
    [babashka.process :as proc]
    [blog.ssg.builders.repo :as repo]
+   [blog.ssg.post :as post]
    [clojure.java.io :as io]
    [clojure.string :as str]))
 
@@ -50,6 +51,11 @@
               (not= content (slurp org-file)))
       (spit org-file content))))
 
+(defn project-by-slug
+  "Find a project in the projects vector by its derived slug."
+  [projects slug]
+  (some #(when (= (post/->slug (:repo-name %)) slug) %) projects))
+
 (defn prepare!
   "For each project in config.edn: mirror the repo (via repo/ensure-mirror!,
   which is a no-op if already done this session), extract its source tree, and
@@ -57,8 +63,8 @@
   [posts-dir]
   (let [{:keys [forge-base-url cache-dir projects]} (read-config)]
     (fs/create-dirs (str posts-dir "/projects"))
-    (doseq [[slug-kw {:keys [repo-name] :as project}] projects]
-      (let [slug     (name slug-kw)
+    (doseq [{:keys [repo-name] :as project} projects]
+      (let [slug     (post/->slug repo-name)
             repo-url (str forge-base-url repo-name)
             git-dir  (str cache-dir "/" slug ".git")
             src-dir  (str cache-dir "/" slug "-src")]

@@ -143,27 +143,31 @@
     :cache-dir      - bare repo cache directory (default \".git-cache\")
     :forge-base-url - base SSH URL for cloning (e.g. \"ssh://forgejo@host/org/\")
     :projects       - map of keyword-slug -> project map (from config.edn)"
-  [& {:keys [prefix cache-dir forge-base-url projects]
-      :or   {prefix    "/projects"
-             cache-dir ".git-cache"}}]
+  [&
+   {:keys [prefix cache-dir forge-base-url projects]
+    :or   {prefix    "/projects"
+           cache-dir ".git-cache"}}]
   (fn [_site _posts]
-    (mapcat (fn [[slug-kw {:keys [repo-name no-serve]}]]
-              (when-not no-serve
-                (let [slug    (name slug-kw)
-                      git-dir (str cache-dir "/" slug ".git")]
-                  (try
-                    (when forge-base-url
-                      (ensure-mirror! (str forge-base-url repo-name) git-dir))
-                    (proc/shell "git" "-C" git-dir "repack" "-a" "-d" "--max-pack-size=20m")
-                    (write-info-refs! git-dir)
-                    (write-info-packs! git-dir)
-                    [{:path      (str (subs prefix 1) "/" slug ".git")
-                      :copy-from git-dir
-                      :directory? true}
-                     {:path      (str (subs prefix 1) "/" slug)
-                      :copy-from git-dir
-                      :directory? true}]
-                    (catch Exception e
-                      (println "Warning: failed to serve" slug "-" (.getMessage e))
-                      nil)))))
-            (or projects {}))))
+    (mapcat (fn [{:keys [repo-name]}]
+              (let [slug    (post/->slug repo-name)
+                    git-dir (str cache-dir "/" slug ".git")]
+                (try
+                  (when forge-base-url
+                    (ensure-mirror! (str forge-base-url repo-name) git-dir))
+                  (proc/shell "git"
+                              "-C"     git-dir
+                              "repack" "-a"
+                              "-d"     "--max-pack-size=20m")
+                  (write-info-refs! git-dir)
+                  (write-info-packs! git-dir)
+                  [{:path       (str (subs prefix 1) "/" slug ".git")
+                    :copy-from  git-dir
+                    :directory? true}
+                   {:path       (str (subs prefix 1) "/" slug)
+                    :copy-from  git-dir
+                    :directory? true}]
+                  (catch Exception e
+                    (println "Warning: failed to serve" slug
+                             "-"                        (.getMessage e))
+                    nil))))
+     (or projects []))))

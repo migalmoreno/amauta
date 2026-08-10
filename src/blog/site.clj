@@ -148,13 +148,18 @@
            (post/post-tags p))]]]
    [:div.post__container (h/raw (post/post-content p))]])
 
+(def ^:private project-order
+  (->> (:projects config)
+       (map-indexed (fn [i {:keys [repo-name]}] [(post/->slug repo-name) i]))
+       (into {})))
+
+(defn- sort-projects
+  [posts]
+  (sort-by #(get project-order (post/post-slug %) Integer/MAX_VALUE) posts))
+
 (defn project-template
   [p]
-  (let [src      (some-> (post/post-ref p :source-dir)
-                         fs/path)
-        slug     (post/post-slug p)
-        base-url (str portfolio-prefix "/" slug "/files")
-        no-serve (:no-serve (get (:projects config) (keyword slug)))]
+  (let [slug (post/post-slug p)]
     [:div.post.project
      [:h1.main__title (or (post/post-ref p :repo-name) (post/post-title p))]
      [:div.post__metadata
@@ -232,7 +237,7 @@
                            :collection-template-fn portfolio-collection-template
                            :collections            [{:name "Projects"
                                                      :path "projects/index.html"
-                                                     :sort-fn identity}])]
+                                                     :sort-fn sort-projects}])]
     (fn [site posts] (builder site (filter project-posts? posts)))))
 
 (def index-builder
@@ -267,7 +272,7 @@ correct practices. Particularly interested in functional programming."]]
             [:button.button.button--type-border
              (anchor "See all" "/projects")]]
            (into [:div.portfolio-entries]
-                 (portfolio-entries (take 6 projects)))]])}])))
+                 (portfolio-entries (take 6 (sort-projects projects))))]])}])))
 
 (defn- contact-entry
   [title text]
