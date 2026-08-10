@@ -17,7 +17,6 @@
             git
             nodejs
             openssh
-            wrangler
             (emacs.pkgs.withPackages (
               epkgs: with epkgs; [
                 htmlize
