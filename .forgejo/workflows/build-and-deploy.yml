@@ -15,9 +15,9 @@ jobs:
           FORGE_BASE_URL: ${{ github.server_url }}/migalmoreno/
           HOME: /tmp/runner-home
           npm_config_cache: ${{ github.workspace }}/.npm-cache
-          TMPDIR: ${{ github.workspace }}/.npm-tmp
+          TMPDIR: /tmp/ci
         run: |
-          mkdir -p /tmp/runner-home ${{ github.workspace }}/.npm-tmp
+          mkdir -p /tmp/runner-home /tmp/ci
           rm -rf /tmp/npm-work
           mkdir -p /tmp/npm-work
           cp package.json /tmp/npm-work/
