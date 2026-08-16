@@ -27,6 +27,14 @@
   (when-let [el (.getElementById js/document "footer-year")]
     (set! (.-textContent el) (.getFullYear (js/Date.)))))
 
+(defonce _active-nav
+  (let [path (.-pathname js/location)]
+    (doseq [link (array-seq (.querySelectorAll js/document ".menu-item__link"))]
+      (let [href (.getAttribute link "href")]
+        (when (or (and (= href "/") (= path "/"))
+                  (and (not= href "/") (str/starts-with? path href)))
+          (.add (.-classList link) "menu-item__link--selected"))))))
+
 (defonce ^:private scroll-state
   (when-let [navbar (.querySelector js/document ".navbar")]
     (let [last-y  (atom (.-scrollY js/window))
