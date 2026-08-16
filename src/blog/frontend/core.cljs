@@ -138,9 +138,10 @@
       toggle-dir!])])
 
 (defn- fetch-text!
-  [url]
-  (-> (js/fetch url)
-      (.then #(.text %))))
+  ([url] (fetch-text! url nil))
+  ([url opts]
+   (-> (js/fetch url (or opts #js {}))
+       (.then #(.text %)))))
 
 (defn- fetch-bytes!
   [url]
@@ -213,7 +214,8 @@
                             str/trim
                             (str/replace #"^ref: refs/heads/" ""))]
              (-> (js/Promise.all
-                  #js [(fetch-text! (str url "/info/refs"))
+                  #js [(fetch-text! (str url "/info/refs")
+                                    #js {:cache "no-store"})
                        (.readFile pfs
                                   (str dir "/refs/heads/" branch)
                                   #js {:encoding "utf8"})])
