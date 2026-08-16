@@ -185,11 +185,8 @@
                               (filter #(str/starts-with? % "P "))
                               (map #(str/trim (subs % 2))))
                  dl!     (fn [path remote]
-                           (-> (.readFile pfs path)
-                               (.then (fn [_] nil))
-                               (.catch (fn [_]
-                                         (-> (fetch-bytes! remote)
-                                             (.then #(.writeFile pfs path %)))))))]
+                           (-> (fetch-bytes! remote)
+                               (.then #(.writeFile pfs path %))))]
              (js/Promise.all
               (clj->js
                (concat
