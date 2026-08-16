@@ -164,10 +164,12 @@
                        #js [(mkdir! (str dir "/refs/heads"))
                             (mkdir! (str dir "/objects/info"))
                             (mkdir! (str dir "/objects/pack"))]))
-              (.then #(js/Promise.all
-                       #js [(fetch-text! (str url "/HEAD"))
-                            (fetch-text! (str url "/info/refs"))
-                            (fetch-text! (str url "/objects/info/packs"))]))
+              (.then #(let [nc #js {:cache "no-store"}
+                            t  (js/Date.now)]
+                        (js/Promise.all
+                         #js [(fetch-text! (str url "/HEAD?t=" t) nc)
+                              (fetch-text! (str url "/info/refs?t=" t) nc)
+                              (fetch-text! (str url "/objects/info/packs?t=" t) nc)])))
               (.then
                (fn [[head refs-text packs-text]]
                  (let [branch  (-> head
@@ -214,7 +216,7 @@
                             str/trim
                             (str/replace #"^ref: refs/heads/" ""))]
              (-> (js/Promise.all
-                  #js [(fetch-text! (str url "/refs/heads/" branch)
+                  #js [(fetch-text! (str url "/refs/heads/" branch "?t=" (js/Date.now))
                                     #js {:cache "no-store"})
                        (.readFile pfs
                                   (str dir "/refs/heads/" branch)
