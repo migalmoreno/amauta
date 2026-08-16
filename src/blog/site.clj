@@ -324,6 +324,15 @@ correct practices. Particularly interested in functional programming."]]
                         ((atom/atom-feeds-by-tag :prefix blog-prefix)
                          site
                          (filter blog-posts? posts)))
+                      (atom/project-atom-feed
+                       :prefix    portfolio-prefix
+                       :cache-dir (:cache-dir config))
+                      (atom/project-atom-feeds
+                       :prefix    portfolio-prefix
+                       :cache-dir (:cache-dir config))
+                      (atom/project-atom-feeds-by-tag
+                       :prefix    portfolio-prefix
+                       :cache-dir (:cache-dir config))
                       (assets/static-directory "assets")]})
 
 (defn -main [& _] (core/build! site) (System/exit 0))

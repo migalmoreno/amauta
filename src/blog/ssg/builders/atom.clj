@@ -1,9 +1,11 @@
 (ns blog.ssg.builders.atom
   "Atom feed builder."
   (:require
+   [blog.ssg.builders.repo :as repo]
    [blog.ssg.post :as post]
    [clojure.data.xml :as xml])
   (:import
+   [java.time OffsetDateTime]
    [java.time.format DateTimeFormatter]
    [java.util Locale]))
 
@@ -74,3 +76,178 @@
               sorted (post/posts-reverse-chronological tagged)]
           {:path    (str tags-prefix "/" tag ".xml")
            :content (xml/emit-str (feed-xml site sorted prefix))})))))
+
+;;; Project feeds
+
+(defn- parse-git-date
+  [s]
+  (OffsetDateTime/parse s))
+
+(defn- format-odt
+  [odt]
+  (.format odt rfc3339))
+
+(defn- project-page-url
+  [domain prefix slug]
+  (str "https://" domain prefix "/" slug ".html"))
+
+(defn- commit-entry-xml
+  [domain prefix slug {:keys [sha message date]}]
+  {:tag     :entry
+   :content [{:tag :title :content [message]}
+             {:tag   :link
+              :attrs {:href (project-page-url domain prefix slug)
+                      :rel  "alternate"}}
+             {:tag     :id
+              :content [(str (project-page-url domain prefix slug) "#" sha)]}
+             {:tag :updated :content [(format-odt (parse-git-date date))]}]})
+
+(defn- project-summary-entry-xml
+  [domain prefix repo-name slug {:keys [message date]}]
+  {:tag     :entry
+   :content [{:tag :title :content [repo-name]}
+             {:tag   :link
+              :attrs {:href (project-page-url domain prefix slug)
+                      :rel  "alternate"}}
+             {:tag :id :content [(project-page-url domain prefix slug)]}
+             {:tag :updated :content [(format-odt (parse-git-date date))]}
+             {:tag :content :attrs {:type "text"} :content [message]}]})
+
+(defn- project-feed-xml
+  [site entry-xmls most-recent feed-path title]
+  (let [domain   (get site :domain "localhost")
+        feed-url (str "https://" domain "/" feed-path)]
+    {:tag     :feed
+     :attrs   {:xmlns "http://www.w3.org/2005/Atom"}
+     :content [{:tag :title :content [title]}
+               {:tag :link :attrs {:href feed-url :rel "self"}}
+               {:tag   :link
+                :attrs {:href (str "https://" domain) :rel "alternate"}}
+               {:tag :id :content [feed-url]}
+               {:tag :updated :content [most-recent]}
+               entry-xmls]}))
+
+(defn- project-posts
+  [posts]
+  (filter #(boolean (post/post-ref % :projects)) posts))
+
+(defn project-atom-feed
+  "Return a builder that generates a combined Atom feed for all projects,
+  with one entry per project keyed on the last commit date.
+
+  Options:
+    :prefix    - URL prefix for project links (default \"/projects\")
+    :path      - output path (default \"projects/feed.xml\")
+    :cache-dir - bare repo cache directory (default \".git-cache\")"
+  [&
+   {:keys [prefix path cache-dir]
+    :or   {prefix "/projects" path "projects/feed.xml" cache-dir ".git-cache"}}]
+  (fn [site posts]
+    (let [domain  (get site :domain "localhost")
+          entries (->> (project-posts posts)
+                       (keep (fn [p]
+                               (let [slug    (post/post-slug p)
+                                     git-dir (str cache-dir "/" slug ".git")
+                                     commit  (repo/repo-last-commit git-dir)]
+                                 (when commit
+                                   {:date (parse-git-date (:date commit))
+                                    :xml  (project-summary-entry-xml
+                                           domain
+                                           prefix
+                                           (or (post/post-ref p :repo-name)
+                                               slug)
+                                           slug
+                                           commit)}))))
+                       (sort-by :date #(compare %2 %1)))]
+      (when (seq entries)
+        [{:path    path
+          :content (xml/emit-str
+                    (project-feed-xml site
+                                      (map :xml entries)
+                                      (format-odt (:date (first entries)))
+                                      path
+                                      (str (get site :title "Site")
+                                           " — Projects")))}]))))
+
+(defn project-atom-feeds
+  "Return a builder that generates one Atom feed per project with individual
+  commits as entries.
+
+  Options:
+    :prefix    - URL prefix for project links (default \"/projects\")
+    :path-fn   - fn of slug -> output path (default \"projects/<slug>/feed.xml\")
+    :cache-dir - bare repo cache directory (default \".git-cache\")
+    :max-count - max commits per feed (default 50)"
+  [&
+   {:keys [prefix path-fn cache-dir max-count]
+    :or   {prefix    "/projects"
+           path-fn   #(str "projects/" % "/feed.xml")
+           cache-dir ".git-cache"
+           max-count 50}}]
+  (fn [site posts]
+    (let [domain (get site :domain "localhost")]
+      (keep
+       (fn [p]
+         (let [slug      (post/post-slug p)
+               repo-name (or (post/post-ref p :repo-name) slug)
+               git-dir   (str cache-dir "/" slug ".git")
+               commits   (repo/repo-commits git-dir :max-count max-count)]
+           (when (seq commits)
+             (let [path (path-fn slug)]
+               {:path    path
+                :content (xml/emit-str
+                          (project-feed-xml
+                           site
+                           (map (partial commit-entry-xml domain prefix slug)
+                                commits)
+                           (format-odt (parse-git-date (:date (first commits))))
+                           path
+                           (str (get site :title "Site") " — " repo-name)))}))))
+       (project-posts posts)))))
+
+(defn project-atom-feeds-by-tag
+  "Return a builder that generates one Atom feed per project tag, each with
+  one entry per matching project keyed on last commit date.
+
+  Options:
+    :prefix      - URL prefix for project links (default \"/projects\")
+    :tags-prefix - output path prefix (default \"projects/tags\")
+    :cache-dir   - bare repo cache directory (default \".git-cache\")"
+  [&
+   {:keys [prefix tags-prefix cache-dir]
+    :or   {prefix      "/projects"
+           tags-prefix "projects/tags"
+           cache-dir   ".git-cache"}}]
+  (fn [site posts]
+    (let [domain (get site :domain "localhost")
+          tagged (->> (project-posts posts)
+                      (keep (fn [p]
+                              (let [slug    (post/post-slug p)
+                                    git-dir (str cache-dir "/" slug ".git")
+                                    commit  (repo/repo-last-commit git-dir)]
+                                (when commit
+                                  {:slug      slug
+                                   :repo-name (or (post/post-ref p :repo-name)
+                                                  slug)
+                                   :tags      (post/post-tags p)
+                                   :date      (parse-git-date (:date commit))
+                                   :commit    commit})))))]
+      (for [tag (distinct (mapcat :tags tagged))]
+        (let [matching (->> tagged
+                            (filter #(some #{tag} (:tags %)))
+                            (sort-by :date #(compare %2 %1)))
+              path     (str tags-prefix "/" tag ".xml")]
+          {:path    path
+           :content (xml/emit-str
+                     (project-feed-xml
+                      site
+                      (map (fn [{:keys [repo-name slug commit]}]
+                             (project-summary-entry-xml domain
+                                                        prefix
+                                                        repo-name
+                                                        slug
+                                                        commit))
+                           matching)
+                      (format-odt (:date (first matching)))
+                      path
+                      (str (get site :title "Site") " — Projects: " tag)))})))))

@@ -102,3 +102,29 @@
                              "-"                        (.getMessage e))
                     nil))))
      (or projects []))))
+
+(defn repo-last-commit
+  "Return {:sha :message :date} for HEAD of git-dir, or nil if unavailable."
+  [git-dir]
+  (try
+    (let [out (:out @(proc/process ["git" "-C" git-dir "log" "-1"
+                                    "--format=%H%x1f%s%x1f%cI"]
+                                   {:out :string :err :string}))]
+      (when-let [line (first (filter seq (str/split-lines out)))]
+        (zipmap [:sha :message :date]
+                (str/split (str/trim line) #"\x1f" 3))))
+    (catch Exception _ nil)))
+
+(defn repo-commits
+  "Return seq of {:sha :message :date} for git-dir, newest first."
+  [git-dir & {:keys [max-count] :or {max-count 50}}]
+  (try
+    (let [out (:out @(proc/process ["git" "-C" git-dir "log"
+                                    (str "--max-count=" max-count)
+                                    "--format=%H%x1f%s%x1f%cI"]
+                                   {:out :string :err :string}))]
+      (->> (str/split-lines out)
+           (filter seq)
+           (map #(zipmap [:sha :message :date]
+                         (str/split (str/trim %) #"\x1f" 3)))))
+    (catch Exception _ [])))
