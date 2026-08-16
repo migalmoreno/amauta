@@ -150,84 +150,57 @@
       (.then #(js/Uint8Array. %))))
 
 (defn- populate-repo!
-  [fs fs-name dir url]
-  (let [pfs (.-promises fs)
+  [fs dir url]
+  (let [pfs    (.-promises fs)
         mkdir! #(-> (.mkdir pfs %)
                     (.catch (constantly nil)))
-        fetch!
-        (fn []
-          (-> (mkdir! dir)
-              (.then #(mkdir! (str dir "/refs")))
-              (.then #(mkdir! (str dir "/info")))
-              (.then #(mkdir! (str dir "/objects")))
-              (.then #(js/Promise.all
-                       #js [(mkdir! (str dir "/refs/heads"))
-                            (mkdir! (str dir "/objects/info"))
-                            (mkdir! (str dir "/objects/pack"))]))
-              (.then #(let [nc #js {:cache "no-store"}
-                            t  (js/Date.now)]
-                        (js/Promise.all
-                         #js [(fetch-text! (str url "/HEAD?t=" t) nc)
-                              (fetch-text! (str url "/info/refs?t=" t) nc)
-                              (fetch-text! (str url "/objects/info/packs?t=" t) nc)])))
-              (.then
-               (fn [[head refs-text packs-text]]
-                 (let [branch  (-> head
-                                   str/trim
-                                   (str/replace #"^ref: refs/heads/" ""))
-                       ref-map (->> (str/split refs-text #"\r?\n")
-                                    (filter seq)
-                                    (keep
-                                     (fn [line]
-                                       (let [[sha ref] (str/split line #"\t" 2)]
-                                         (when (and sha ref)
-                                           [(str/trim ref) (str/trim sha)]))))
-                                    (into {}))
-                       sha     (or (get ref-map (str "refs/heads/" branch))
-                                   (get ref-map "HEAD"))
-                       packs   (->> (str/split packs-text #"\n")
-                                    (filter #(str/starts-with? % "P "))
-                                    (map #(str/trim (subs % 2))))]
-                   (js/Promise.all
-                    (clj->js
-                     (concat
-                      [(.writeFile pfs (str dir "/HEAD") head)
-                       (.writeFile pfs
-                                   (str dir "/refs/heads/" branch)
-                                   (str sha "\n"))]
-                      (mapcat (fn [pack]
-                                (let [idx  (str/replace pack #"\.pack$" ".idx")
-                                      base (str url "/objects/pack/")]
-                                  [(-> (fetch-bytes! (str base pack))
-                                       (.then #(.writeFile
-                                                pfs
-                                                (str dir "/objects/pack/" pack)
-                                                %)))
-                                   (-> (fetch-bytes! (str base idx))
-                                       (.then #(.writeFile
-                                                pfs
-                                                (str dir "/objects/pack/" idx)
-                                                %)))]))
-                       packs)))))))))]
-    (-> (.readFile pfs (str dir "/HEAD") #js {:encoding "utf8"})
+        nc     #js {:cache "no-store"}
+        t      (js/Date.now)]
+    (-> (mkdir! dir)
+        (.then #(mkdir! (str dir "/refs")))
+        (.then #(mkdir! (str dir "/info")))
+        (.then #(mkdir! (str dir "/objects")))
+        (.then #(js/Promise.all
+                 #js [(mkdir! (str dir "/refs/heads"))
+                      (mkdir! (str dir "/objects/info"))
+                      (mkdir! (str dir "/objects/pack"))]))
+        (.then #(js/Promise.all
+                 #js [(fetch-text! (str url "/HEAD?t=" t) nc)
+                      (fetch-text! (str url "/info/refs?t=" t) nc)
+                      (fetch-text! (str url "/objects/info/packs?t=" t) nc)]))
         (.then
-         (fn [cached-head]
-           (let [branch (-> cached-head
-                            str/trim
-                            (str/replace #"^ref: refs/heads/" ""))]
-             (-> (js/Promise.all
-                  #js [(fetch-text! (str url "/refs/heads/" branch "?t=" (js/Date.now))
-                                    #js {:cache "no-store"})
-                       (.readFile pfs
-                                  (str dir "/refs/heads/" branch)
-                                  #js {:encoding "utf8"})])
-                 (.then (fn [[remote-sha cached-sha]]
-                          (when (not= (str/trim cached-sha) (str/trim remote-sha))
-                            (-> (js/Promise.resolve
-                                 (.init fs fs-name #js {:wipe true}))
-                                (.then fetch!)))))
-                 (.catch (fn [_] (fetch!)))))))
-        (.catch (fn [_] (fetch!))))))
+         (fn [[head refs-text packs-text]]
+           (let [branch  (-> head str/trim
+                             (str/replace #"^ref: refs/heads/" ""))
+                 ref-map (->> (str/split refs-text #"\r?\n")
+                              (filter seq)
+                              (keep (fn [line]
+                                      (let [[sha ref] (str/split line #"\t" 2)]
+                                        (when (and sha ref)
+                                          [(str/trim ref) (str/trim sha)]))))
+                              (into {}))
+                 sha     (or (get ref-map (str "refs/heads/" branch))
+                             (get ref-map "HEAD"))
+                 packs   (->> (str/split packs-text #"\n")
+                              (filter #(str/starts-with? % "P "))
+                              (map #(str/trim (subs % 2))))
+                 dl!     (fn [path remote]
+                           (-> (.readFile pfs path)
+                               (.then (fn [_] nil))
+                               (.catch (fn [_]
+                                         (-> (fetch-bytes! remote)
+                                             (.then #(.writeFile pfs path %)))))))]
+             (js/Promise.all
+              (clj->js
+               (concat
+                [(.writeFile pfs (str dir "/HEAD") head)
+                 (.writeFile pfs (str dir "/refs/heads/" branch) (str sha "\n"))]
+                (mapcat (fn [pack]
+                          (let [idx  (str/replace pack #"\.pack$" ".idx")
+                                base (str url "/objects/pack/")]
+                            [(dl! (str dir "/objects/pack/" pack) (str base pack))
+                             (dl! (str dir "/objects/pack/" idx)  (str base idx))]))
+                        packs))))))))))
 
 (defn- format-bytes
   [n]
@@ -414,7 +387,7 @@
                   :content        nil
                   :error          nil
                   :open-dirs      #{}})]
-    (-> (populate-repo! fs fs-name dir git-url)
+    (-> (populate-repo! fs dir git-url)
         (.then
          (fn [_]
            (-> (git/currentBranch #js {:fs fs :dir dir :gitdir dir})
