@@ -214,27 +214,16 @@
                             str/trim
                             (str/replace #"^ref: refs/heads/" ""))]
              (-> (js/Promise.all
-                  #js [(fetch-text! (str url "/info/refs")
+                  #js [(fetch-text! (str url "/refs/heads/" branch)
                                     #js {:cache "no-store"})
                        (.readFile pfs
                                   (str dir "/refs/heads/" branch)
                                   #js {:encoding "utf8"})])
-                 (.then (fn [[remote-refs cached-sha]]
-                          (let [remote-sha
-                                (->> (str/split remote-refs #"\r?\n")
-                                     (filter seq)
-                                     (keep (fn [line]
-                                             (let [[sha ref]
-                                                   (str/split line #"\t" 2)]
-                                               (when (= (str/trim ref)
-                                                        (str "refs/heads/"
-                                                             branch))
-                                                 (str/trim sha)))))
-                                     first)]
-                            (when (not= (str/trim cached-sha) remote-sha)
-                              (-> (js/Promise.resolve
-                                   (.init fs fs-name #js {:wipe true}))
-                                  (.then fetch!))))))
+                 (.then (fn [[remote-sha cached-sha]]
+                          (when (not= (str/trim cached-sha) (str/trim remote-sha))
+                            (-> (js/Promise.resolve
+                                 (.init fs fs-name #js {:wipe true}))
+                                (.then fetch!)))))
                  (.catch (fn [_] (fetch!)))))))
         (.catch (fn [_] (fetch!))))))
 
