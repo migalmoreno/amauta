@@ -836,6 +836,12 @@ pre.line-numbers {
   background: var(--bg-active);
 }
 
+.feed-icon {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
 .project__files {
   border: 1px solid var(--border-dim);
   border-radius: 6px;

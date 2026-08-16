@@ -46,6 +46,21 @@
    [:line {:x1 "60" :y1 "20" :x2 "40" :y2 "80"}]
    [:polyline {:fill "none" :points "75,35 90,50 75,65"}]])
 
+(defn- rss-link
+  [url]
+  [:a.button.button--type-border.feed-icon
+   {:href url :title "Atom feed" :aria-label "Atom feed"}
+   [:svg
+    {:xmlns       "http://www.w3.org/2000/svg"
+     :viewBox     "0 0 24 24"
+     :width       "16"
+     :height      "16"
+     :fill        "currentColor"
+     :aria-hidden "true"}
+    [:circle {:cx "5" :cy "19" :r "2"}]
+    [:path {:d "M4 4a16 16 0 0 1 16 16h-3A13 13 0 0 0 4 7z"}]
+    [:path {:d "M4 11a9 9 0 0 1 9 9H10a6 6 0 0 0-6-6z"}]]])
+
 (defn anchor
   [label url &
    {:keys [external? extra-classes extra-attrs] :or {extra-attrs []}}]
@@ -91,7 +106,10 @@
            [:div.project-item__synopsis
             [:span (post/post-ref post :synopsis)]]]
           [:ul.tags
-           (map (fn [tag] [:li.tag tag])
+           (map (fn [tag]
+                  [:li.tag
+                   [:a.tag__link
+                    {:href (str portfolio-prefix "/tags/" tag ".xml")} tag]])
                 (post/post-ref post :tags))]])
        projects))
 
@@ -161,14 +179,20 @@
   [p]
   (let [slug (post/post-slug p)]
     [:div.post.project
-     [:h1.main__title (or (post/post-ref p :repo-name) (post/post-title p))]
+     [:div.main__title
+      [:h1 (or (post/post-ref p :repo-name) (post/post-title p))]
+      (rss-link (str portfolio-prefix "/" slug "/feed.xml"))]
      [:div.post__metadata
       [:div.post__metadata-items
        (post/post-ref p :license)]
       [:div.post__metadata-items
        [:h4.post__subtitle (post/post-ref p :synopsis)]
        [:ul.tags
-        (map (fn [tag] [:li.tag tag]) (post/post-tags p))]]]
+        (map (fn [tag]
+               [:li.tag
+                [:a.tag__link
+                 {:href (str portfolio-prefix "/tags/" tag ".xml")} tag]])
+             (post/post-tags p))]]]
      (let [clone-url   (str "https://" domain portfolio-prefix "/" slug)
            display-url (subs clone-url (count "https://"))]
        [:div
@@ -182,14 +206,15 @@
   [_site title posts _prefix]
   [:div.blog
    [:div.main__title [:h1.blog__title title]
-    [:button.button.button--type-border (anchor "Feed" "/feed.xml")]]
+    (rss-link "/feed.xml")]
    (into [:div.blog-entries]
          (blog-entries (post/posts-reverse-chronological posts)))])
 
 (defn portfolio-collection-template
   [_site title projects _prefix]
   [:div.portfolio
-   [:div.main__title [:h1.portfolio__title title]]
+   [:div.main__title [:h1.portfolio__title title]
+    (rss-link (str portfolio-prefix "/feed.xml"))]
    (into [:div.portfolio-entries] (portfolio-entries projects))])
 
 (def prism-css-builder
