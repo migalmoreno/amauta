@@ -185,8 +185,9 @@
                               (filter #(str/starts-with? % "P "))
                               (map #(str/trim (subs % 2))))
                  dl!     (fn [path remote]
-                           (-> (fetch-bytes! remote)
-                               (.then #(.writeFile pfs path %))))]
+                           (-> (js/fetch (str remote "?t=" t) #js {:cache "no-store"})
+                               (.then #(.arrayBuffer %))
+                               (.then #(.writeFile pfs path (js/Uint8Array. %)))))]
              (js/Promise.all
               (clj->js
                (concat
