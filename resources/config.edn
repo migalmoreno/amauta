@@ -1,4 +1,4 @@
-{:forge-base-url #or [#env FORGE_BASE_URL "http://auriga:8084/migalmoreno/"]
+{:forge-base-url #or [#env FORGE_BASE_URL "http://cygnus:8084/migalmoreno/"]
  :cache-dir ".git-cache"
  :projects
  [{:repo-name "tubo"
