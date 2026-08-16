@@ -144,7 +144,13 @@
                  (codec/url-encode (h/html (logo :fill "#c4c4c4"))))}]
     (stylesheet "main" :local? true)
     [:link {:rel "stylesheet" :href "/assets/css/highlight.css"}]
-    [:script {:src "/assets/js/main.js" :defer true}]]
+    [:script {:src (str "/assets/js/main.js?v="
+                        (-> (Runtime/getRuntime)
+                            (.exec (into-array ["git" "rev-parse" "--short" "HEAD"]))
+                            (.getInputStream)
+                            (slurp)
+                            (str/trim)))
+              :defer true}]]
    [:body navbar
     [:div.body-container
      [:main.main body]
