@@ -184,25 +184,20 @@
                  packs   (->> (str/split packs-text #"\n")
                               (filter #(str/starts-with? % "P "))
                               (map #(str/trim (subs % 2))))
-                 ref-path (str dir "/refs/heads/" branch)]
-             (-> (.readFile pfs ref-path #js {:encoding "utf8"})
-                 (.catch (constantly nil))
-                 (.then
-                  (fn [stored-sha]
-                    (when (not= (some-> stored-sha str/trim) sha)
-                      (js/Promise.all
-                       (clj->js
-                        (concat
-                         [(.writeFile pfs (str dir "/HEAD") head)
-                          (.writeFile pfs ref-path (str sha "\n"))]
-                         (mapcat (fn [pack]
-                                   (let [idx  (str/replace pack #"\.pack$" ".idx")
-                                         base (str url "/objects/pack/")]
-                                     [(-> (fetch-bytes! (str base pack))
-                                          (.then #(.writeFile pfs (str dir "/objects/pack/" pack) %)))
-                                      (-> (fetch-bytes! (str base idx))
-                                          (.then #(.writeFile pfs (str dir "/objects/pack/" idx) %)))]))
-                                 packs))))))))))))
+                 dl!     (fn [path remote]
+                           (-> (fetch-bytes! remote)
+                               (.then #(.writeFile pfs path %))))]
+             (js/Promise.all
+              (clj->js
+               (concat
+                [(.writeFile pfs (str dir "/HEAD") head)
+                 (.writeFile pfs (str dir "/refs/heads/" branch) (str sha "\n"))]
+                (mapcat (fn [pack]
+                          (let [idx  (str/replace pack #"\.pack$" ".idx")
+                                base (str url "/objects/pack/")]
+                            [(dl! (str dir "/objects/pack/" pack) (str base pack))
+                             (dl! (str dir "/objects/pack/" idx)  (str base idx))]))
+                        packs))))))))))
 
 (defn- format-bytes
   [n]
