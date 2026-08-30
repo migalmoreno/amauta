@@ -29,4 +29,8 @@
   {:repo-name "fdroid.el"
    :synopsis  "An Emacs interface for F-Droid"
    :tags      ["emacs-lisp"]
+   :license   "GPL-3.0"}
+  {:repo-name "amauta"
+   :synopsis  "Personal website"
+   :tags      ["clojure" "clojurescript"]
    :license   "GPL-3.0"}]}
