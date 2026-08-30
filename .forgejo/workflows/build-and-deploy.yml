@@ -21,6 +21,7 @@ jobs:
           TMPDIR: /tmp/ci
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CF_ACCOUNT_ID }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           mkdir -p /tmp/runner-home /tmp/ci
           rm -rf /tmp/npm-work

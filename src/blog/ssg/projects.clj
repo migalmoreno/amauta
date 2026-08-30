@@ -5,6 +5,7 @@
    [aero.core :as aero]
    [babashka.fs :as fs]
    [babashka.process :as proc]
+   [blog.ssg.builders.github :as github]
    [blog.ssg.builders.repo :as repo]
    [blog.ssg.post :as post]
    [clojure.java.io :as io]
@@ -57,13 +58,18 @@
   (some #(when (= (post/->slug (:repo-name %)) slug) %) projects))
 
 (defn prepare!
-  "For each project in config.edn: mirror the repo (via repo/ensure-mirror!,
-  which is a no-op if already done this session), extract its source tree, and
-  write a combined org post to posts-dir/projects/."
+  "For each project in config.edn: fetch a local bare mirror from Forgejo
+  (via repo/ensure-mirror!, a no-op if already done this session), extract
+  its source tree, write a combined org post to posts-dir/projects/, and,
+  when GH_TOKEN is set, publish that mirror to GitHub (via
+  github/ensure-repo! and github/push-mirror!)."
   [posts-dir]
-  (let [{:keys [forge-base-url cache-dir projects]} (read-config)]
+  (let [{:keys [forge-base-url github-owner cache-dir projects]}
+        (read-config)
+        github-token (System/getenv "GH_TOKEN")]
     (fs/create-dirs (str posts-dir "/projects"))
-    (doseq [{:keys [repo-name] :as project} projects]
+    (when github-token (github/setup-git-auth!))
+    (doseq [{:keys [repo-name synopsis] :as project} projects]
       (let [slug     (post/->slug repo-name)
             repo-url (str forge-base-url repo-name)
             git-dir  (str cache-dir "/" slug ".git")
@@ -73,6 +79,9 @@
           (repo/ensure-mirror! repo-url git-dir)
           (extract-archive! git-dir src-dir)
           (write-org-file! posts-dir src-dir slug project)
+          (when github-token
+            (github/ensure-repo! github-owner repo-name synopsis)
+            (github/push-mirror! git-dir github-owner repo-name))
           (catch Exception e
             (println "Warning: failed to prepare" slug
                      "-"                          (.getMessage e))))))))

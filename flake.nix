@@ -14,6 +14,7 @@
         default = pkgs.mkShell {
           buildInputs = with pkgs; [
             clojure
+            gh
             git
             nodejs
             openssh
