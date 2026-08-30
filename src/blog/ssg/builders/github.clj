@@ -15,26 +15,36 @@
       :exit
       zero?))
 
-(defn ensure-repo!
-  "Create owner/repo-name on GitHub if it doesn't exist and keep its
-  description and issues setting in sync."
+(defn- create-repo!
+  [owner repo-name]
+  (proc/shell "gh" "repo" "create" (str owner "/" repo-name) "--public"))
+
+(defn- sync-settings!
   [owner repo-name synopsis]
-  (if (repo-exists? owner repo-name)
-    (proc/shell "gh"
-                "repo"
-                "edit"
-                (str owner "/" repo-name)
-                "--description"
-                synopsis
-                "--enable-issues=false")
-    (proc/shell "gh"
-                "repo"
-                "create"
-                (str owner "/" repo-name)
-                "--public"
-                "--description"
-                synopsis
-                "--disable-issues")))
+  (proc/shell "gh"
+              "repo"
+              "edit"
+              (str owner "/" repo-name)
+              "--description"
+              synopsis
+              "--enable-issues=false"
+              "--enable-wiki=false"
+              "--enable-projects=false")
+  (proc/shell "gh"
+              "api"
+              "--method"
+              "PUT"
+              (str "repos/" owner "/" repo-name "/actions/permissions")
+              "-F"
+              "enabled=false"))
+
+(defn ensure-repo!
+  "Create owner/repo-name on GitHub if it doesn't exist, then bring its
+  description, issues, wiki, projects, and Actions settings in sync."
+  [owner repo-name synopsis]
+  (when-not (repo-exists? owner repo-name)
+    (create-repo! owner repo-name))
+  (sync-settings! owner repo-name synopsis))
 
 (defn push-mirror!
   "Push the bare mirror at git-dir to owner/repo-name on GitHub."
