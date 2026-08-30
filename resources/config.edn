@@ -7,10 +7,11 @@
    :tags            ["clojure" "clojurescript"]
    :license         "AGPL-3.0"
    :github-actions? true}
-  {:repo-name "alegoria"
-   :synopsis  "A libre gallery aggregator for the web"
-   :tags      ["typescript" "python"]
-   :license   "AGPL-3.0"}
+  {:repo-name       "alegoria"
+   :synopsis        "A libre gallery aggregator for the web"
+   :tags            ["typescript" "python"]
+   :license         "AGPL-3.0"
+   :github-actions? true}
   {:repo-name "nyxt.el"
    :synopsis  "An Emacs interface for Nyxt"
    :tags      ["emacs-lisp" "nyxt"]
