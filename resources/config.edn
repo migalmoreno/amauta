@@ -2,10 +2,11 @@
  :github-owner "migalmoreno"
  :cache-dir ".git-cache"
  :projects
- [{:repo-name "tubo"
-   :synopsis  "A libre streaming aggregator for the web"
-   :tags      ["clojure" "clojurescript"]
-   :license   "AGPL-3.0"}
+ [{:repo-name       "tubo"
+   :synopsis        "A libre streaming aggregator for the web"
+   :tags            ["clojure" "clojurescript"]
+   :license         "AGPL-3.0"
+   :github-actions? true}
   {:repo-name "alegoria"
    :synopsis  "A libre gallery aggregator for the web"
    :tags      ["typescript" "python"]

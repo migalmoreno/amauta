@@ -33,7 +33,7 @@
   (proc/shell "gh" "repo" "create" (str owner "/" repo-name) "--public"))
 
 (defn- sync-settings!
-  [owner repo-name synopsis]
+  [owner repo-name synopsis actions?]
   (proc/shell "gh"
               "repo"
               "edit"
@@ -49,15 +49,16 @@
               "PUT"
               (str "repos/" owner "/" repo-name "/actions/permissions")
               "-F"
-              "enabled=false"))
+              (str "enabled=" (boolean actions?))))
 
 (defn ensure-repo!
   "Create owner/repo-name on GitHub if it doesn't exist, then bring its
-  description, issues, wiki, projects, and Actions settings in sync."
-  [owner repo-name synopsis]
+  description, issues, wiki, projects, and Actions settings in sync.
+  actions? controls whether GitHub Actions is enabled for the repo."
+  [owner repo-name synopsis actions?]
   (when-not (repo-exists? owner repo-name)
     (create-repo! owner repo-name))
-  (sync-settings! owner repo-name synopsis))
+  (sync-settings! owner repo-name synopsis actions?))
 
 (defn push-mirror!
   "Push the bare mirror at git-dir to owner/repo-name on GitHub."
