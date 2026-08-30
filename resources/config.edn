@@ -33,4 +33,8 @@
   {:repo-name "amauta"
    :synopsis  "Personal website"
    :tags      ["clojure" "clojurescript"]
+   :license   "GPL-3.0"}
+  {:repo-name "ordenada"
+   :synopsis  "Personal Nix configuration"
+   :tags      ["nix"]
    :license   "GPL-3.0"}]}
