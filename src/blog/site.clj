@@ -21,7 +21,7 @@
 
 (def domain "migalmoreno.com")
 (def email "mail@migalmoreno.com")
-(def fullname "Miguel Ángel Moreno")
+(def fullname "Miguel Angel Moreno")
 
 (def blog-prefix "/blog")
 (def portfolio-prefix "/projects")
@@ -336,7 +336,9 @@ correct practices. Particularly interested in functional programming."]]
    :default-metadata {:author fullname :email email}
    :posts-dir        "posts"
    :output-dir       "site"
-   :prepare-fn       (fn [] (stop-daemon!) (projects/prepare! "posts"))
+   :prepare-fn       (fn []
+                       (stop-daemon!)
+                       (projects/prepare! "posts" fullname domain))
    :readers          [(make-dir-tagging-reader org-reader)]
    :builders         [cljs-builder prism-css-builder index-builder
                       portfolio-builder

@@ -8,6 +8,19 @@
   []
   (proc/shell "gh" "auth" "setup-git"))
 
+(defn update-profile!
+  "Set the authenticated GitHub account's display name and external link."
+  [fullname domain]
+  (proc/shell "gh"
+              "api"
+              "--method"
+              "PATCH"
+              "user"
+              "-f"
+              (str "name=" fullname)
+              "-f"
+              (str "blog=https://" domain)))
+
 (defn- repo-exists?
   [owner repo-name]
   (-> @(proc/process ["gh" "repo" "view" (str owner "/" repo-name)]

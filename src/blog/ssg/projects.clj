@@ -62,13 +62,17 @@
   (via repo/ensure-mirror!, a no-op if already done this session), extract
   its source tree, write a combined org post to posts-dir/projects/, and,
   when GH_TOKEN is set, publish that mirror to GitHub (via
-  github/ensure-repo! and github/push-mirror!)."
-  [posts-dir]
+  github/ensure-repo! and github/push-mirror!). Also, when GH_TOKEN is set,
+  syncs the GitHub account's display name and external link to fullname and
+  domain."
+  [posts-dir fullname domain]
   (let [{:keys [forge-base-url github-owner cache-dir projects]}
         (read-config)
         github-token (System/getenv "GH_TOKEN")]
     (fs/create-dirs (str posts-dir "/projects"))
-    (when github-token (github/setup-git-auth!))
+    (when github-token
+      (github/setup-git-auth!)
+      (github/update-profile! fullname domain))
     (doseq [{:keys [repo-name synopsis] :as project} projects]
       (let [slug     (post/->slug repo-name)
             repo-url (str forge-base-url repo-name)
