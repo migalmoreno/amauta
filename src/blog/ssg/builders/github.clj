@@ -49,7 +49,14 @@
               "PUT"
               (str "repos/" owner "/" repo-name "/actions/permissions")
               "-F"
-              (str "enabled=" (boolean actions?))))
+              (str "enabled=" (boolean actions?)))
+  (proc/shell "gh"
+              "api"
+              "--method"
+              "PATCH"
+              (str "repos/" owner "/" repo-name)
+              "-F"
+              "has_pull_requests=false"))
 
 (defn ensure-repo!
   "Create owner/repo-name on GitHub if it doesn't exist, then bring its
