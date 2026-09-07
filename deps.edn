@@ -11,6 +11,10 @@
                    :main-opts  ["-m" "amauta.site"]}
            :serve {:extra-deps {ring/ring-jetty-adapter {:mvn/version "1.12.2"}}
                    :main-opts  ["-m" "amauta.ssg.serve"]}
+           :serve-dev {:extra-deps {ring/ring-jetty-adapter {:mvn/version "1.12.2"}
+                                    thheller/shadow-cljs    {:mvn/version "2.28.18"}}
+                       :extra-paths ["dev"]
+                       :exec-fn user/serve!}}
  :deps    {aero/aero            {:mvn/version "1.1.6"}
            reagent/reagent      {:mvn/version "1.2.0"}
            babashka/fs          {:mvn/version "0.5.34"}

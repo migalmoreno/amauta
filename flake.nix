@@ -10,6 +10,14 @@
         f: nixpkgs.lib.genAttrs (import systems) (system: f (import nixpkgs { inherit system; }));
     in
     {
+      apps = eachSystem (pkgs: {
+        default = {
+          type = "app";
+          program = "${pkgs.writeShellScript "blog-serve" ''
+            exec ${pkgs.clojure}/bin/clojure -X:serve-dev "$@"
+          ''}";
+        };
+      });
       devShells = eachSystem (pkgs: {
         default = pkgs.mkShell {
           buildInputs = with pkgs; [
