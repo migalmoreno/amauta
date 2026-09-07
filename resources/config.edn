@@ -7,9 +7,9 @@
    :tags            ["clojure" "clojurescript"]
    :license         "AGPL-3.0"
    :github-actions? true}
-  {:repo-name       "alegoria"
+  {:repo-name       "andito"
    :synopsis        "A libre gallery aggregator for the web"
-   :tags            ["typescript" "python"]
+   :tags            ["python" "typescript"]
    :license         "AGPL-3.0"
    :github-actions? true}
   {:repo-name "nyxt.el"
@@ -37,6 +37,6 @@
    :tags      ["clojure" "clojurescript"]
    :license   "GPL-3.0"}
   {:repo-name "ordenada"
-   :synopsis  "Personal Nix configuration"
+   :synopsis  "Personal configuration files"
    :tags      ["nix"]
    :license   "GPL-3.0"}]}
