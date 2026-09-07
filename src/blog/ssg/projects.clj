@@ -1,13 +1,14 @@
-(ns blog.ssg.projects
+(ns amauta.ssg.projects
   "Project preparation: mirrors repos, extracts source trees, and generates
   org post files from resources/config.edn so the org reader can process them."
   (:require
    [aero.core :as aero]
    [babashka.fs :as fs]
    [babashka.process :as proc]
-   [blog.ssg.builders.github :as github]
-   [blog.ssg.builders.repo :as repo]
-   [blog.ssg.post :as post]
+   [amauta.ssg.builders.github :as github]
+   [amauta.ssg.builders.publish :as publish]
+   [amauta.ssg.builders.repo :as repo]
+   [amauta.ssg.post :as post]
    [clojure.java.io :as io]
    [clojure.string :as str]))
 
@@ -88,7 +89,7 @@
                                  repo-name
                                  synopsis
                                  github-actions?)
-            (github/push-mirror! git-dir github-owner repo-name))
+            (github/push-branch! git-dir github-owner repo-name))
           (catch Exception e
             (println "Warning: failed to prepare" slug
                      "-"                          (.getMessage e))))))))

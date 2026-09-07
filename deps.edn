@@ -8,9 +8,9 @@
                                  "--middleware"
                                  "[cider.nrepl/cider-middleware]"]}
            :build {:extra-deps {thheller/shadow-cljs {:mvn/version "2.28.18"}}
-                   :main-opts  ["-m" "blog.site"]}
+                   :main-opts  ["-m" "amauta.site"]}
            :serve {:extra-deps {ring/ring-jetty-adapter {:mvn/version "1.12.2"}}
-                   :main-opts  ["-m" "blog.ssg.serve"]}}
+                   :main-opts  ["-m" "amauta.ssg.serve"]}
  :deps    {aero/aero            {:mvn/version "1.1.6"}
            reagent/reagent      {:mvn/version "1.2.0"}
            babashka/fs          {:mvn/version "0.5.34"}

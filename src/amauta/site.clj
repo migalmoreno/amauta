@@ -1,6 +1,4 @@
-(ns blog.site
-  "Site configuration — the Clojure equivalent of haunt.scm.
-  Run with: clojure -M -m site"
+(ns amauta.site
   (:require
    [babashka.fs :as fs]
    [clojure.string :as str]
@@ -9,15 +7,15 @@
    [ring.util.codec :as codec]
    [shadow.cljs.devtools.api :as shadow]
    [shadow.cljs.devtools.server :as shadow-server]
-   [blog.ssg.core :as core]
-   [blog.ssg.post :as post]
-   [blog.ssg.readers.org :refer [org-reader stop-daemon!]]
-   [blog.ssg.readers.dir-tagging :refer [make-dir-tagging-reader]]
-   [blog.ssg.builders.blog :as blog]
-   [blog.ssg.builders.atom :as atom]
-   [blog.ssg.builders.assets :as assets]
-   [blog.ssg.builders.repo :as repo]
-   [blog.ssg.projects :as projects]))
+   [amauta.ssg.core :as core]
+   [amauta.ssg.post :as post]
+   [amauta.ssg.readers.org :refer [org-reader stop-daemon!]]
+   [amauta.ssg.readers.dir-tagging :refer [make-dir-tagging-reader]]
+   [amauta.ssg.builders.blog :as blog]
+   [amauta.ssg.builders.atom :as atom]
+   [amauta.ssg.builders.assets :as assets]
+   [amauta.ssg.builders.repo :as repo]
+   [amauta.ssg.projects :as projects]))
 
 (def domain "migalmoreno.com")
 (def email "mail@migalmoreno.com")
@@ -144,13 +142,14 @@
                  (codec/url-encode (h/html (logo :fill "#c4c4c4"))))}]
     (stylesheet "main" :local? true)
     [:link {:rel "stylesheet" :href "/assets/css/highlight.css"}]
-    [:script {:src (str "/assets/js/main.js?v="
-                        (-> (Runtime/getRuntime)
-                            (.exec (into-array ["git" "rev-parse" "--short" "HEAD"]))
-                            (.getInputStream)
-                            (slurp)
-                            (str/trim)))
-              :defer true}]]
+    [:script
+     {:src   (str "/assets/js/main.js?v="
+                  (-> (Runtime/getRuntime)
+                      (.exec (into-array ["git" "rev-parse" "--short" "HEAD"]))
+                      (.getInputStream)
+                      (slurp)
+                      (str/trim)))
+      :defer true}]]
    [:body navbar
     [:div.body-container
      [:main.main body]

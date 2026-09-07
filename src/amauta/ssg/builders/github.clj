@@ -1,7 +1,8 @@
-(ns blog.ssg.builders.github
+(ns amauta.ssg.builders.github
   "Mirrors project repos to GitHub via the gh CLI."
   (:require
-   [babashka.process :as proc]))
+   [babashka.process :as proc]
+   [clojure.string :as str]))
 
 (defn setup-git-auth!
   "Configure git to authenticate to GitHub via the gh CLI (GH_TOKEN)."
@@ -67,12 +68,20 @@
     (create-repo! owner repo-name))
   (sync-settings! owner repo-name synopsis actions?))
 
-(defn push-mirror!
-  "Push the bare mirror at git-dir to owner/repo-name on GitHub."
+(defn push-branch!
+  "Force-push git-dir's current branch to owner/repo-name on GitHub under
+  that same branch name, rather than mirroring every local ref (e.g. the
+  internal `public` bookkeeping branch used by the publish builder)."
   [git-dir owner repo-name]
-  (proc/shell "git"
-              "-C"
-              git-dir
-              "push"
-              "--mirror"
-              (str "https://github.com/" owner "/" repo-name ".git")))
+  (let [branch (-> @(proc/process ["git" "-C" git-dir "symbolic-ref" "--short"
+                                   "HEAD"]
+                                  {:out :string :err :string})
+                   :out
+                   str/trim)]
+    (proc/shell "git"
+                "-C"
+                git-dir
+                "push"
+                "--force"
+                (str "https://github.com/" owner "/" repo-name ".git")
+                (str "refs/heads/" branch ":refs/heads/" branch))))

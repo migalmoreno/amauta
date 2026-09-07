@@ -1,7 +1,7 @@
-(ns blog.ssg.builders.blog
+(ns amauta.ssg.builders.blog
   "Blog builder: generates individual post pages and collection index pages."
   (:require
-   [blog.ssg.post :as post]))
+   [amauta.ssg.post :as post]))
 
 (defn post-uri
   [prefix p]

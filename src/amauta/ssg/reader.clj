@@ -1,4 +1,4 @@
-(ns blog.ssg.reader
+(ns amauta.ssg.reader
   "Reader abstraction and post-directory scanning.
 
   A reader is a map:
@@ -12,7 +12,7 @@
   Simple readers can ignore it by using (fn [file & _] ...)."
   (:require
    [babashka.fs :as fs]
-   [blog.ssg.post :as post]))
+   [amauta.ssg.post :as post]))
 
 (defn- find-reader
   [readers file]

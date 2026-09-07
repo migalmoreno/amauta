@@ -1,4 +1,4 @@
-(ns blog.ssg.post
+(ns amauta.ssg.post
   (:require
    [clojure.string :as str])
   (:import

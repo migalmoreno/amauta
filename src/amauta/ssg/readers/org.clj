@@ -1,4 +1,4 @@
-(ns blog.ssg.readers.org
+(ns amauta.ssg.readers.org
   "Org-mode reader: renders .org files to HTML via an Emacs subprocess.
 
   Respects these environment variables:
@@ -11,7 +11,7 @@
    [babashka.process :as proc]
    [clojure.java.io :as io]
    [clojure.string :as str]
-   [blog.ssg.post :as post])
+   [amauta.ssg.post :as post])
   (:import
    [java.io File]
    [java.security MessageDigest]))

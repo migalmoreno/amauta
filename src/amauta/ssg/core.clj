@@ -1,7 +1,8 @@
-(ns blog.ssg.core
+(ns amauta.ssg.core
   "Core build runner: reads posts and invokes builders to produce site output."
-  (:require [babashka.fs :as fs]
-            [blog.ssg.reader :as reader]))
+  (:require
+   [babashka.fs :as fs]
+   [amauta.ssg.reader :as reader]))
 
 (defn- write-artifact
   [output-dir {:keys [path content copy-from directory?]}]
@@ -20,7 +21,7 @@
   [result]
   (cond (nil? result) []
         (map? result) [result]
-        :else (filter map? (flatten result))))
+        :else         (filter map? (flatten result))))
 
 (defn build!
   "Run the full site build.
@@ -37,15 +38,15 @@
   Scans posts-dir, reads all posts, runs every builder, and writes the
   resulting artifacts to output-dir."
   [site]
-  (let [{:keys [posts-dir output-dir readers builders prepare-fn],
-         :or {posts-dir "posts", output-dir "site"}}
-          site]
+  (let [{:keys [posts-dir output-dir readers builders prepare-fn]
+         :or   {posts-dir "posts" output-dir "site"}}
+        site]
     (when prepare-fn (prepare-fn))
     (println "Reading posts from" posts-dir "...")
     (let [defaults (:default-metadata site {})
-          posts (cond->> (doall (reader/read-posts posts-dir readers))
-                  (seq defaults)
-                    (map #(update % :metadata (fn [m] (merge defaults m)))))]
+          posts    (cond->> (doall (reader/read-posts posts-dir readers))
+                     (seq defaults)
+                     (map #(update % :metadata (fn [m] (merge defaults m)))))]
       (println "Read" (count posts) "posts.")
       (println "Building site into" output-dir "...")
       (doseq [builder builders]

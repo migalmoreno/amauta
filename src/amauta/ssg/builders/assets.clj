@@ -1,4 +1,4 @@
-(ns blog.ssg.builders.assets
+(ns amauta.ssg.builders.assets
   "Static assets builder: copies directory trees into the output.")
 
 (defn static-directory

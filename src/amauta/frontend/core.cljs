@@ -1,4 +1,4 @@
-(ns blog.frontend.core
+(ns amauta.frontend.core
   (:require
    ["prismjs" :as Prism]
    ["prismjs/plugins/line-numbers/prism-line-numbers"]
@@ -156,48 +156,51 @@
                     (.catch (constantly nil)))
         nc     #js {:cache "no-store"}
         t      (js/Date.now)]
-    (-> (mkdir! dir)
-        (.then #(mkdir! (str dir "/refs")))
-        (.then #(mkdir! (str dir "/info")))
-        (.then #(mkdir! (str dir "/objects")))
-        (.then #(js/Promise.all
-                 #js [(mkdir! (str dir "/refs/heads"))
-                      (mkdir! (str dir "/objects/info"))
-                      (mkdir! (str dir "/objects/pack"))]))
-        (.then #(js/Promise.all
-                 #js [(fetch-text! (str url "/HEAD?t=" t) nc)
-                      (fetch-text! (str url "/info/refs?t=" t) nc)
-                      (fetch-text! (str url "/objects/info/packs?t=" t) nc)]))
-        (.then
-         (fn [[head refs-text packs-text]]
-           (let [branch  (-> head str/trim
-                             (str/replace #"^ref: refs/heads/" ""))
-                 ref-map (->> (str/split refs-text #"\r?\n")
-                              (filter seq)
-                              (keep (fn [line]
-                                      (let [[sha ref] (str/split line #"\t" 2)]
-                                        (when (and sha ref)
-                                          [(str/trim ref) (str/trim sha)]))))
-                              (into {}))
-                 sha     (or (get ref-map (str "refs/heads/" branch))
-                             (get ref-map "HEAD"))
-                 packs   (->> (str/split packs-text #"\n")
-                              (filter #(str/starts-with? % "P "))
-                              (map #(str/trim (subs % 2))))
-                 dl!     (fn [path remote]
-                           (-> (fetch-bytes! remote)
-                               (.then #(.writeFile pfs path %))))]
-             (js/Promise.all
-              (clj->js
-               (concat
-                [(.writeFile pfs (str dir "/HEAD") head)
-                 (.writeFile pfs (str dir "/refs/heads/" branch) (str sha "\n"))]
-                (mapcat (fn [pack]
-                          (let [idx  (str/replace pack #"\.pack$" ".idx")
-                                base (str url "/objects/pack/")]
-                            [(dl! (str dir "/objects/pack/" pack) (str base pack))
-                             (dl! (str dir "/objects/pack/" idx)  (str base idx))]))
-                        packs))))))))))
+    (->
+      (mkdir! dir)
+      (.then #(mkdir! (str dir "/refs")))
+      (.then #(mkdir! (str dir "/info")))
+      (.then #(mkdir! (str dir "/objects")))
+      (.then #(js/Promise.all
+               #js [(mkdir! (str dir "/refs/heads"))
+                    (mkdir! (str dir "/objects/info"))
+                    (mkdir! (str dir "/objects/pack"))]))
+      (.then #(js/Promise.all
+               #js [(fetch-text! (str url "/HEAD?t=" t) nc)
+                    (fetch-text! (str url "/info/refs?t=" t) nc)
+                    (fetch-text! (str url "/objects/info/packs?t=" t) nc)]))
+      (.then
+       (fn [[head refs-text packs-text]]
+         (let [branch  (-> head
+                           str/trim
+                           (str/replace #"^ref: refs/heads/" ""))
+               ref-map (->> (str/split refs-text #"\r?\n")
+                            (filter seq)
+                            (keep (fn [line]
+                                    (let [[sha ref] (str/split line #"\t" 2)]
+                                      (when (and sha ref)
+                                        [(str/trim ref) (str/trim sha)]))))
+                            (into {}))
+               sha     (or (get ref-map (str "refs/heads/" branch))
+                           (get ref-map "HEAD"))
+               packs   (->> (str/split packs-text #"\n")
+                            (filter #(str/starts-with? % "P "))
+                            (map #(str/trim (subs % 2))))
+               dl!     (fn [path remote]
+                         (-> (fetch-bytes! remote)
+                             (.then #(.writeFile pfs path %))))]
+           (js/Promise.all
+            (clj->js
+             (concat
+              [(.writeFile pfs (str dir "/HEAD") head)
+               (.writeFile pfs (str dir "/refs/heads/" branch) (str sha "\n"))]
+              (mapcat (fn [pack]
+                        (let [idx  (str/replace pack #"\.pack$" ".idx")
+                              base (str url "/objects/pack/")]
+                          [(dl! (str dir "/objects/pack/" pack) (str base pack))
+                           (dl! (str dir "/objects/pack/" idx)
+                                (str base idx))]))
+               packs))))))))))
 
 (defn- format-bytes
   [n]

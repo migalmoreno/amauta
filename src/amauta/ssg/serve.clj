@@ -1,4 +1,4 @@
-(ns blog.ssg.serve
+(ns amauta.ssg.serve
   (:require
    [babashka.fs :as fs]
    [ring.adapter.jetty :as jetty]

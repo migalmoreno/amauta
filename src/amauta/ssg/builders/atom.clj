@@ -1,8 +1,8 @@
-(ns blog.ssg.builders.atom
+(ns amauta.ssg.builders.atom
   "Atom feed builder."
   (:require
-   [blog.ssg.builders.repo :as repo]
-   [blog.ssg.post :as post]
+   [amauta.ssg.builders.repo :as repo]
+   [amauta.ssg.post :as post]
    [clojure.data.xml :as xml])
   (:import
    [java.time OffsetDateTime]

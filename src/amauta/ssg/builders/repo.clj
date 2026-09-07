@@ -1,12 +1,25 @@
-(ns blog.ssg.builders.repo
+(ns amauta.ssg.builders.repo
   "Git repo HTTP serving: mirrors repos and exposes them via dumb HTTP protocol."
   (:require
    [babashka.process :as proc]
    [clojure.java.io :as io]
    [clojure.string :as str]
-   [blog.ssg.post :as post]))
+   [amauta.ssg.post :as post]))
 
 (def ^:private mirrored (atom #{}))
+
+(defn setup-git-auth!
+  "Configure git to authenticate HTTP(S) operations under forge-base-url
+  with a Forgejo access token."
+  [forge-base-url username token]
+  (let [authed (str/replace-first forge-base-url
+                                  #"^https?://"
+                                  #(str % username ":" token "@"))]
+    (proc/shell "git"
+                "config"
+                "--global"
+                (str "url." authed ".insteadOf")
+                forge-base-url)))
 
 (defn ensure-mirror!
   "Clone url as a bare repo to git-dir if not present, or fetch updates if it

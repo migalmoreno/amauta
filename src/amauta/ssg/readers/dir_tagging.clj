@@ -1,4 +1,4 @@
-(ns blog.ssg.readers.dir-tagging
+(ns amauta.ssg.readers.dir-tagging
   "Wraps another reader to inject subdirectory names as post metadata.
 
   For a file at posts/projects/foo.org the wrapped reader will add
