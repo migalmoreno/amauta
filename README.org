@@ -1,10 +1,16 @@
 # -*- mode: org; org-html-head-include-default-style: nil; org-html-postamble: nil;  -*-
 #+OPTIONS: toc:nil num:nil
 #+title: amauta
-To build the site, navigate to a Clojure file, enter a REPL via =cider-jack-in-clj= and run this:
+To build the site, run:
+
+#+begin_src shell
+clojure -M:build
+#+end_src
+
+This statically generates the HTML files and compiles the front-end files into =site=.
+
+For live development you can serve the build of the site interactively. Navigate to a Clojure file, enter a REPL via =cider-jack-in-clj= and run this:
 
 #+begin_src clojure
 user> (serve!)
 #+end_src
-
-This should build the site by statically generating the HTML files and compiling the front-end files.
