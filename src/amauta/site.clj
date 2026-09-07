@@ -337,7 +337,7 @@ correct practices. Particularly interested in functional programming."]]
    :output-dir       "site"
    :prepare-fn       (fn []
                        (stop-daemon!)
-                       (projects/prepare! "posts" fullname domain))
+                       (projects/prepare! "posts" fullname email domain))
    :readers          [(make-dir-tagging-reader org-reader)]
    :builders         [cljs-builder prism-css-builder index-builder
                       portfolio-builder

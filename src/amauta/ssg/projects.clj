@@ -60,17 +60,26 @@
 
 (defn prepare!
   "For each project in config.edn: fetch a local bare mirror from Forgejo
-  (via repo/ensure-mirror!, a no-op if already done this session), extract
-  its source tree, write a combined org post to posts-dir/projects/, and,
-  when GH_TOKEN is set, publish that mirror to GitHub (via
-  github/ensure-repo! and github/push-mirror!). Also, when GH_TOKEN is set,
-  syncs the GitHub account's display name and external link to fullname and
-  domain."
-  [posts-dir fullname domain]
+  (via repo/ensure-mirror!, a no-op if already done this session), squash any
+  commits made since the last publish into a single publish-dated commit on
+  a dedicated `public` branch, force-push that branch back to Forgejo, and
+  repoint the local mirror's branch at it (via publish/squash-unpublished!,
+  leaving the branch you actually develop on untouched), extract its source
+  tree, write a combined org post to posts-dir/projects/, and, when GH_TOKEN
+  is set, publish that mirror to GitHub (via github/ensure-repo! and
+  github/push-branch!). Also, when GH_TOKEN is set, syncs the GitHub
+  account's display name and external link to fullname and domain. When
+  FORGEJO_TOKEN is set, authenticates pushes to forge-base-url (via
+  repo/setup-git-auth!) so squash-unpublished!'s push to `public` succeeds.
+  Squash commits are authored as fullname/email."
+  [posts-dir fullname email domain]
   (let [{:keys [forge-base-url github-owner cache-dir projects]}
         (read-config)
-        github-token (System/getenv "GH_TOKEN")]
+        github-token  (System/getenv "GH_TOKEN")
+        forgejo-token (System/getenv "FORGEJO_TOKEN")]
     (fs/create-dirs (str posts-dir "/projects"))
+    (when forgejo-token
+      (repo/setup-git-auth! forge-base-url github-owner forgejo-token))
     (when github-token
       (github/setup-git-auth!)
       (github/update-profile! fullname domain))
@@ -82,6 +91,7 @@
         (println "Preparing project" slug "...")
         (try
           (repo/ensure-mirror! repo-url git-dir)
+          (publish/squash-unpublished! git-dir repo-url fullname email)
           (extract-archive! git-dir src-dir)
           (write-org-file! posts-dir src-dir slug project)
           (when github-token
