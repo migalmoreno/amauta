@@ -60,19 +60,19 @@
 
 (defn prepare!
   "For each project in config.edn: fetch a local bare mirror from Forgejo
-  (via repo/ensure-mirror!, a no-op if already done this session), squash any
-  commits made since the last publish into a single publish-dated commit on
-  a dedicated `public` branch, force-push that branch back to Forgejo, and
-  repoint the local mirror's branch at it (via publish/squash-unpublished!,
-  leaving the branch you actually develop on untouched), extract its source
-  tree, write a combined org post to posts-dir/projects/, and, when GH_TOKEN
-  is set, publish that mirror to GitHub (via github/ensure-repo! and
-  github/push-branch!). Also, when GH_TOKEN is set, syncs the GitHub
-  account's display name and external link to fullname and domain. When
-  FORGEJO_TOKEN is set, authenticates pushes to forge-base-url (via
-  repo/setup-git-auth!) so squash-unpublished!'s push to `public` succeeds.
-  Squash commits are authored as fullname/email."
-  [posts-dir fullname email domain]
+  (via repo/ensure-mirror!, a no-op if already done this session), redate
+  any commits made since the last publish onto a dedicated `public` branch
+  (same tree/message/author, date reset to now), force-push that branch
+  back to Forgejo, and repoint the local mirror's branch at it (via
+  publish/sync-public!, leaving the branch you actually develop on
+  untouched), extract its source tree, write a combined org post to
+  posts-dir/projects/, and, when GH_TOKEN is set, publish that mirror to
+  GitHub (via github/ensure-repo! and github/push-branch!). Also, when
+  GH_TOKEN is set, syncs the GitHub account's display name and external
+  link to fullname and domain. When FORGEJO_TOKEN is set, authenticates
+  pushes to forge-base-url (via repo/setup-git-auth!) so sync-public!'s
+  push to `public` succeeds."
+  [posts-dir fullname domain]
   (let [{:keys [forge-base-url github-owner cache-dir projects]}
         (read-config)
         github-token  (System/getenv "GH_TOKEN")
@@ -91,7 +91,7 @@
         (println "Preparing project" slug "...")
         (try
           (repo/ensure-mirror! repo-url git-dir)
-          (publish/squash-unpublished! git-dir repo-url fullname email)
+          (publish/sync-public! git-dir repo-url)
           (extract-archive! git-dir src-dir)
           (write-org-file! posts-dir src-dir slug project)
           (when github-token
