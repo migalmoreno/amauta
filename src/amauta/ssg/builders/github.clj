@@ -98,6 +98,25 @@
   (when (some? github-topics)
     (sync-topics! owner repo-name github-topics)))
 
+(defn- list-repos
+  [owner]
+  (->> @(proc/process ["gh" "repo" "list" owner "--limit" "1000"
+                       "--json" "name" "--jq" ".[].name"]
+                      {:out :string :err :string})
+       :out
+       str/split-lines
+       (remove str/blank?)
+       set))
+
+(defn prune-repos!
+  "Delete every repo owned by owner that isn't in KEEP (the set of repo-names
+  declared in config.edn), so the GitHub account stays a pure mirror of the
+  site. Requires a token with the delete_repo scope."
+  [owner keep]
+  (doseq [repo-name (set/difference (list-repos owner) (set keep))]
+    (println "Deleting stale GitHub repo" repo-name)
+    (proc/shell "gh" "repo" "delete" (str owner "/" repo-name) "--yes")))
+
 (defn push-branch!
   "Force-push git-dir's current branch to owner/repo-name on GitHub under
   that same branch name, rather than mirroring every local ref (e.g. the

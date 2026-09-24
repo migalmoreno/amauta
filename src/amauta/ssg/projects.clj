@@ -69,7 +69,8 @@
   posts-dir/projects/, and, when GH_TOKEN is set, publish that mirror to
   GitHub (via github/ensure-repo! and github/push-branch!). Also, when
   GH_TOKEN is set, syncs the GitHub account's display name and external
-  link to fullname and domain. When FORGEJO_TOKEN is set, authenticates
+  link to fullname and domain, and prunes any GitHub repos not declared in
+  config.edn (via github/prune-repos!). When FORGEJO_TOKEN is set, authenticates
   pushes to forge-base-url (via repo/setup-git-auth!) so sync-public!'s
   push to `public` succeeds."
   [posts-dir fullname domain]
@@ -82,7 +83,8 @@
       (repo/setup-git-auth! forge-base-url github-owner forgejo-token))
     (when github-token
       (github/setup-git-auth!)
-      (github/update-profile! fullname domain))
+      (github/update-profile! fullname domain)
+      (github/prune-repos! github-owner (map :repo-name projects)))
     (doseq [{:keys [repo-name synopsis github-actions? github-topics] :as project}
             projects]
       (let [slug     (post/->slug repo-name)
