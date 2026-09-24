@@ -73,28 +73,6 @@
               branch-head))
 
 (defn sync-public!
-  "Ensure git-dir's `public` branch has a redated copy of every commit on
-  the branch you actually develop on. Each new commit's tree, message, and
-  author/committer identity are preserved exactly; only its date is reset
-  to now, so nothing reveals when it was really made. All commits redated
-  in the same run share one timestamp.
-
-  The first time it's called for a repo, and any time branch turns out to
-  have been rebased past the commit recorded as last synced (detected via
-  the `public-source` tag no longer being an ancestor of branch), `public`
-  is reset to an exact, unrewritten copy of branch's current state, so
-  pre-existing/rebased-in history, its real dates, and any real signatures
-  are left untouched, and only commits made after that point ever get
-  redated. This is logged, since it means the previously published window
-  was discarded rather than silently (mis)reconciled.
-
-  Force-pushes `public` and public-source to repo-url so the boundary
-  survives across cache clears, then repoints git-dir's local branch ref
-  at public's tip so every downstream consumer of git-dir (archive
-  extraction, the dumb-HTTP git server, the commit browser, and the
-  GitHub mirror) transparently serves the redated history under the
-  branch's real name, without that branch's history in Forgejo ever
-  being touched."
   [git-dir repo-url]
   (let [branch      (git-out git-dir "symbolic-ref" "--short" "HEAD")
         branch-head (git-out git-dir "rev-parse" branch)

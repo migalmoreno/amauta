@@ -2,6 +2,7 @@
   "Mirrors project repos to GitHub via the gh CLI."
   (:require
    [babashka.process :as proc]
+   [clojure.set :as set]
    [clojure.string :as str]))
 
 (defn setup-git-auth!
@@ -59,14 +60,43 @@
               "-F"
               "has_pull_requests=false"))
 
+(defn- current-topics
+  [owner repo-name]
+  (->> @(proc/process ["gh" "repo" "view" (str owner "/" repo-name)
+                       "--json" "repositoryTopics"
+                       "--jq" ".repositoryTopics[].name"]
+                      {:out :string :err :string})
+       :out
+       str/split-lines
+       (remove str/blank?)
+       set))
+
+(defn- sync-topics!
+  [owner repo-name tags]
+  (let [current   (current-topics owner repo-name)
+        desired   (set tags)
+        to-add    (set/difference desired current)
+        to-remove (set/difference current desired)]
+    (when (seq to-add)
+      (proc/shell "gh" "repo" "edit" (str owner "/" repo-name)
+                  "--add-topic" (str/join "," to-add)))
+    (when (seq to-remove)
+      (proc/shell "gh" "repo" "edit" (str owner "/" repo-name)
+                  "--remove-topic" (str/join "," to-remove)))))
+
 (defn ensure-repo!
   "Create owner/repo-name on GitHub if it doesn't exist, then bring its
   description, issues, wiki, projects, and Actions settings in sync.
-  actions? controls whether GitHub Actions is enabled for the repo."
-  [owner repo-name synopsis actions?]
+  actions? controls whether GitHub Actions is enabled for the repo. When
+  github-topics is non-nil, also reconciles the repo's GitHub topics with it
+  (added/removed via a diff against the repo's current topics), since gh
+  only exposes additive/subtractive topic edits, not a replace-all."
+  [owner repo-name synopsis actions? github-topics]
   (when-not (repo-exists? owner repo-name)
     (create-repo! owner repo-name))
-  (sync-settings! owner repo-name synopsis actions?))
+  (sync-settings! owner repo-name synopsis actions?)
+  (when (some? github-topics)
+    (sync-topics! owner repo-name github-topics)))
 
 (defn push-branch!
   "Force-push git-dir's current branch to owner/repo-name on GitHub under

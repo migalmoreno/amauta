@@ -83,7 +83,8 @@
     (when github-token
       (github/setup-git-auth!)
       (github/update-profile! fullname domain))
-    (doseq [{:keys [repo-name synopsis github-actions?] :as project} projects]
+    (doseq [{:keys [repo-name synopsis github-actions? github-topics] :as project}
+            projects]
       (let [slug     (post/->slug repo-name)
             repo-url (str forge-base-url repo-name)
             git-dir  (str cache-dir "/" slug ".git")
@@ -98,7 +99,8 @@
             (github/ensure-repo! github-owner
                                  repo-name
                                  synopsis
-                                 github-actions?)
+                                 github-actions?
+                                 github-topics)
             (github/push-branch! git-dir github-owner repo-name))
           (catch Exception e
             (println "Warning: failed to prepare" slug

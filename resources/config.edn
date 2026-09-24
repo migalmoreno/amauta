@@ -5,6 +5,7 @@
  [{:repo-name       "tubo"
    :synopsis        "A libre streaming aggregator for the web"
    :tags            ["clojure" "clojurescript"]
+   :github-topics   ["newpipe" "youtube" "clojure"]
    :license         "AGPL-3.0"
    :github-actions? true}
   {:repo-name       "andito"
