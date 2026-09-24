@@ -13,6 +13,10 @@
    :tags            ["python" "typescript"]
    :license         "AGPL-3.0"
    :github-actions? true}
+  {:repo-name "chakana"
+   :synopsis  "A map-driven orchestration tool"
+   :tags      ["typescript"]
+   :license   "GPL-3.0"}
   {:repo-name "nyxt.el"
    :synopsis  "An Emacs interface for Nyxt"
    :tags      ["emacs-lisp" "nyxt"]
@@ -36,8 +40,4 @@
   {:repo-name "amauta"
    :synopsis  "Personal website"
    :tags      ["clojure" "clojurescript"]
-   :license   "GPL-3.0"}
-  {:repo-name "ordenada"
-   :synopsis  "Personal configuration files"
-   :tags      ["nix"]
    :license   "GPL-3.0"}]}
